@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
-mongoose.connect("mongodb://localhost:27017/");
+mongoose.connect("mongodb://localhost:27017/iyan");
 
 const db = mongoose.connection;
 
