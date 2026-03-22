@@ -6,13 +6,14 @@ import {
     updateOrder,
     deleteOrder
 } from "../controller/orderControl.js";
+import { imageUpload } from "../controller/usercontrol.js";
 
 const router = express.Router();
 
-router.post('/createOrder', createOrder);
+router.post('/createOrder', imageUpload.none(), createOrder);
 router.get('/getOrders', getOrders);
 router.get('/getOrder/:id', getOrderById);
-router.put('/updateOrder/:id', updateOrder);
+router.put('/updateOrder/:id', imageUpload.none(), updateOrder);
 router.delete('/deleteOrder/:id', deleteOrder);
 
 export default router;

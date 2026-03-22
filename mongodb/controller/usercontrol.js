@@ -102,3 +102,22 @@ export const updateUser = async (req, res) => {
         res.status(500).json({ message: "Error updating user", error: error.message });
     }
 }
+
+export const searchUser = async (req, res) => {
+    try {
+        const keyword = req.query.keyword;
+        if (!keyword) {
+            return res.status(400).json({ message: "No search keyword provided" });
+        }
+
+        const users = await User.find({
+            $or: [
+                { name: { $regex: keyword, $options: 'i' } },
+                { email: { $regex: keyword, $options: 'i' } }
+            ]
+        });
+        res.status(200).json({ message: "Users fetched successfully", data: users });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching users", error: error.message });
+    }
+}

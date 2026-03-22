@@ -3,12 +3,17 @@ import Order from "../modules/Order.js";
 // Create a new order
 export const createOrder = async (req, res) => {
     try {
+        let items = req.body.items;
+        if (typeof items === 'string') {
+            try { items = JSON.parse(items); } catch(e) {}
+        }
+
         const orderData = {
             customerName: req.body.customerName,
             email: req.body.email,
             total: req.body.total,
             paymentMethod: req.body.paymentMethod,
-            items: req.body.items, // Expecting array of objects
+            items: items, // Expecting array of objects
             address: req.body.address,
             paymentStatus: req.body.paymentStatus || "Pending",
             orderStatus: req.body.orderStatus || "Processing"

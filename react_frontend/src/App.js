@@ -13,6 +13,7 @@ import AdminLogin from "./admin/pages/Login";
 import AdminCustomers from "./admin/pages/Customers";
 import AdminSettings from "./admin/pages/Settings";
 import ProductDetail from "./components/ProductDetail";
+import GetUsers from "./components/getusers";
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
           <Route path="customers" element={<AdminCustomers />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
+        <Route path="/getusers" element={<GetUsers />} />
       </Routes>
       {!isAdminRoute && <Footer />}
     </div>

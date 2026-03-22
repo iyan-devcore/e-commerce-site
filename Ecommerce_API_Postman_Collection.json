@@ -1,0 +1,516 @@
+{
+  "info": {
+    "name": "E-Commerce API",
+    "description": "Postman Collection for E-Commerce APIs (User, Product, Order)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Add User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "firstName",
+                  "value": "John",
+                  "type": "text"
+                },
+                {
+                  "key": "lastName",
+                  "value": "Doe",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "john.doe@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "password123",
+                  "type": "text"
+                },
+                {
+                  "key": "agreeTerms",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "imageUpload",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/user/addUser",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "addUser"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/user/getUsers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "getUsers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/user/searchUser?keyword=John",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "searchUser"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "John"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "firstName",
+                  "value": "Jane",
+                  "type": "text"
+                },
+                {
+                  "key": "lastName",
+                  "value": "Smith",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "jane.smith@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "newpassword123",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/user/updateUser/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "updateUser",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "REPLACE_WITH_USER_ID"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/user/deleteUser/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "deleteUser",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "REPLACE_WITH_USER_ID"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product Management",
+      "item": [
+        {
+          "name": "Add Product",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Sample Product",
+                  "type": "text"
+                },
+                {
+                  "key": "category",
+                  "value": "Electronics",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "99.99",
+                  "type": "text"
+                },
+                {
+                  "key": "discountPrice",
+                  "value": "89.99",
+                  "type": "text"
+                },
+                {
+                  "key": "stock",
+                  "value": "50",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "Active",
+                  "type": "text"
+                },
+                {
+                  "key": "sku",
+                  "value": "PROD-001",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "A great product description.",
+                  "type": "text"
+                },
+                {
+                  "key": "imageUpload",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/product/addProduct",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "product",
+                "addProduct"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/product/getProducts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "product",
+                "getProducts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/product/getProduct/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "product",
+                "getProduct",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "REPLACE_WITH_PRODUCT_ID"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Updated Product",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "105.99",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/product/updateProduct/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "product",
+                "updateProduct",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "REPLACE_WITH_PRODUCT_ID"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/product/deleteProduct/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "product",
+                "deleteProduct",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "REPLACE_WITH_PRODUCT_ID"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order Management",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"total\": 199.98,\n  \"paymentMethod\": \"Credit Card\",\n  \"items\": [\n    {\n      \"name\": \"Wireless Headphones\",\n      \"quantity\": 2,\n      \"price\": 99.99\n    }\n  ],\n  \"address\": \"123 Main St, City, Country\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/order/createOrder",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "order",
+                "createOrder"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/order/getOrders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "order",
+                "getOrders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/order/getOrder/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "order",
+                "getOrder",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "REPLACE_WITH_ORDER_ID"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderStatus\": \"Shipped\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/order/updateOrder/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "order",
+                "updateOrder",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "REPLACE_WITH_ORDER_ID"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/order/deleteOrder/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "order",
+                "deleteOrder",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "REPLACE_WITH_ORDER_ID"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
