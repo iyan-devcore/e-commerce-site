@@ -1,38 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Table from '../components/ui/Table';
 import Badge from '../components/ui/Badge';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
-import { mockOrders } from '../data/mockData';
 
 const Orders = () => {
-    const [orders, setOrders] = useState(mockOrders);
+    const [orders, setOrders] = useState([]);
     const [filterStatus, setFilterStatus] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/order/getOrders');
+                const data = await response.json();
+                if (data.data) {
+                    setOrders(data.data);
+                }
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+            }
+        };
+        fetchOrders();
+    }, []);
+
     const filteredOrders = orders.filter(order => {
         const matchesStatus = filterStatus ? order.orderStatus === filterStatus : true;
-        const matchesSearch = order.customer.toLowerCase().includes(searchTerm.toLowerCase()) || order.id.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = (order.customerName && order.customerName.toLowerCase().includes(searchTerm.toLowerCase())) || 
+                              (order._id && order._id.toLowerCase().includes(searchTerm.toLowerCase()));
         return matchesStatus && matchesSearch;
     });
 
     const columns = [
-        { header: 'Order ID', accessor: 'id', render: (row) => <span className="font-mono font-medium text-blue-600">{row.id}</span> },
+        { header: 'Order ID', accessor: '_id', render: (row) => <span className="font-mono font-medium text-blue-600">#{row._id.substring(row._id.length - 6).toUpperCase()}</span> },
         {
             header: 'Customer',
-            accessor: 'customer',
+            accessor: 'customerName',
             render: (row) => (
                 <div>
-                    <div className="text-sm font-medium text-gray-900">{row.customer}</div>
+                    <div className="text-sm font-medium text-gray-900">{row.customerName}</div>
                     <div className="text-xs text-gray-500">{row.email}</div>
                 </div>
             )
         },
-        { header: 'Date', accessor: 'date' },
+        { header: 'Date', accessor: 'createdAt', render: (row) => <span>{new Date(row.createdAt).toLocaleDateString()}</span> },
         {
             header: 'Total',
             accessor: 'total',
-            render: (row) => <span className="font-bold">${row.total.toFixed(2)}</span>
+            render: (row) => <span className="font-bold">₹{row.total.toFixed(2)}</span>
         },
         {
             header: 'Payment',

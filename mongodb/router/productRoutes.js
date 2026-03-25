@@ -10,10 +10,10 @@ import { imageUpload } from "../controller/usercontrol.js";
 
 const router = express.Router();
 
-router.post('/addProduct', imageUpload.single('imageUpload'), addProduct);
+router.post('/addProduct', imageUpload.array('imageUpload', 5), addProduct);
 router.get('/getProducts', getProducts);
 router.get('/getProduct/:id', getProductById);
-router.put('/updateProduct/:id', imageUpload.single('imageUpload'), updateProduct);
+router.put('/updateProduct/:id', imageUpload.array('imageUpload', 5), updateProduct);
 router.delete('/deleteProduct/:id', deleteProduct);
 
 export default router;

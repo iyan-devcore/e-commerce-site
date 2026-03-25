@@ -1,18 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './sidebar';
 
 const Orders = () => {
     const [statusFilter, setStatusFilter] = useState('All');
+    const [orders, setOrders] = useState([]);
 
-    // Mock data
-    const orders = [
-        { id: '#ORD-7829', customer: 'Alice Freeman', date: 'Oct 24, 2024', total: '₹5,499', status: 'Pending', items: 3 },
-        { id: '#ORD-7828', customer: 'Robert Wolf', date: 'Oct 24, 2024', total: '₹2,499', status: 'Completed', items: 1 },
-        { id: '#ORD-7827', customer: 'Sarah Connor', date: 'Oct 23, 2024', total: '₹12,999', status: 'Processing', items: 2 },
-        { id: '#ORD-7826', customer: 'John Smith', date: 'Oct 23, 2024', total: '₹899', status: 'Cancelled', items: 1 },
-        { id: '#ORD-7825', customer: 'Emily Blunt', date: 'Oct 22, 2024', total: '₹24,999', status: 'Shipped', items: 1 },
-        { id: '#ORD-7824', customer: 'Michael Chen', date: 'Oct 21, 2024', total: '₹3,250', status: 'Completed', items: 4 },
-    ];
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/order/getOrders');
+                const data = await response.json();
+                if (data.data) {
+                    setOrders(data.data);
+                }
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+            }
+        };
+        fetchOrders();
+    }, []);
 
     const getStatusStyle = (status) => {
         switch (status) {
@@ -93,30 +99,30 @@ const Orders = () => {
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-100">
                                     {orders.map((order) => (
-                                        <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                                        <tr key={order._id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="text-sm font-medium text-blue-600 cursor-pointer hover:underline">{order.id}</span>
+                                                <span className="text-sm font-medium text-blue-600 cursor-pointer hover:underline">#{order._id.substring(order._id.length - 6).toUpperCase()}</span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-gray-200 to-gray-300 flex items-center justify-center text-xs font-bold text-gray-600 mr-3">
-                                                        {order.customer.charAt(0)}
+                                                        {order.customerName ? order.customerName.charAt(0).toUpperCase() : '?'}
                                                     </div>
-                                                    <div className="text-sm font-medium text-gray-900">{order.customer}</div>
+                                                    <div className="text-sm font-medium text-gray-900">{order.customerName}</div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-gray-600">{order.date}</div>
+                                                <div className="text-sm text-gray-600">{new Date(order.createdAt).toLocaleDateString()}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-gray-600">{order.items}</div>
+                                                <div className="text-sm text-gray-600">{order.items ? order.items.length : 0} items</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-semibold text-gray-900">{order.total}</div>
+                                                <div className="text-sm font-semibold text-gray-900">₹{order.total}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusStyle(order.status)}`}>
-                                                    {order.status}
+                                                <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusStyle(order.orderStatus)}`}>
+                                                    {order.orderStatus}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

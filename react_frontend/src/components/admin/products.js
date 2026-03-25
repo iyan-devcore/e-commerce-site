@@ -1,25 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './sidebar';
 
 const Products = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('All');
+    const [products, setProducts] = useState([]);
 
-    // Mock data - replace with API call later
-    const products = [
-        { id: 1, name: 'Wireless Headphones', category: 'Audio', price: '₹2,499', stock: 45, status: 'In Stock', image: '/images/headphones_prod.png' },
-        { id: 2, name: 'Smart Watch Series 7', category: 'Wearables', price: '₹24,999', stock: 12, status: 'Low Stock', image: '/images/smartwatch_prod.png' },
-        { id: 3, name: 'Running Shoes', category: 'Fashion', price: '₹3,999', stock: 0, status: 'Out of Stock', image: '/images/runningshoes_prod.png' },
-        { id: 4, name: 'Leather Bag', category: 'Accessories', price: '₹5,499', stock: 28, status: 'In Stock', image: '/images/leatherbag_prod.png' },
-        { id: 5, name: 'Gaming Mouse', category: 'Electronics', price: '₹1,299', stock: 150, status: 'In Stock', image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=100&h=100&fit=crop' },
-        { id: 6, name: 'Mechanical Keyboard', category: 'Electronics', price: '₹4,599', stock: 8, status: 'Low Stock', image: 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?w=100&h=100&fit=crop' },
-    ];
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/product/getProducts');
+                const data = await response.json();
+                if (data.data) {
+                    setProducts(data.data);
+                }
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            }
+        };
+        fetchProducts();
+    }, []);
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'In Stock': return 'bg-green-100 text-green-700';
+            case 'Active': return 'bg-green-100 text-green-700';
+            case 'Inactive': return 'bg-red-100 text-red-700';
             case 'Low Stock': return 'bg-yellow-100 text-yellow-700';
-            case 'Out of Stock': return 'bg-red-100 text-red-700';
             default: return 'bg-gray-100 text-gray-700';
         }
     };
@@ -107,15 +113,15 @@ const Products = () => {
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-100">
                                     {products.map((product) => (
-                                        <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                                        <tr key={product._id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <div className="h-10 w-10 flex-shrink-0">
-                                                        <img className="h-10 w-10 rounded-lg object-cover border border-gray-200" src={product.image} alt="" loading="lazy" />
+                                                        <img className="h-10 w-10 rounded-lg object-cover border border-gray-200" src={product.imageUpload || 'https://via.placeholder.com/100'} alt="" loading="lazy" />
                                                     </div>
                                                     <div className="ml-4">
                                                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                                                        <div className="text-xs text-gray-500">ID: #{product.id}</div>
+                                                        <div className="text-xs text-gray-500">ID: #{product._id}</div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -123,7 +129,7 @@ const Products = () => {
                                                 <div className="text-sm text-gray-600">{product.category}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-semibold text-gray-900">{product.price}</div>
+                                                <div className="text-sm font-semibold text-gray-900">₹{product.price}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-sm text-gray-600">{product.stock} units</div>

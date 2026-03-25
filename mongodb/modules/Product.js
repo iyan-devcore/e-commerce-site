@@ -9,7 +9,7 @@ const productSchema = new mongoose.Schema({
     status: { type: String, enum: ["Active", "Inactive"], default: "Active" },
     sku: { type: String, required: [true, "SKU is required"], unique: true },
     description: { type: String, required: [true, "Description is required"] },
-    imageUpload: { type: String },
+    imageUpload: [{ type: String }],
 }, { timestamps: true });
 
 const Product = mongoose.model("Product", productSchema);

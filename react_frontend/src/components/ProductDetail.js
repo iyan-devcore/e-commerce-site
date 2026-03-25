@@ -83,23 +83,67 @@ const CheckIcon = () => (
 
 const ProductDetail = () => {
     const { id } = useParams();
-    // In a real app, fetch functionality based on ID would be here
-    const product = dummyProduct;
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const [selectedImage, setSelectedImage] = useState(product.images[0]);
-    const [selectedColor, setSelectedColor] = useState(product.colors[0]);
-    const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [selectedColor, setSelectedColor] = useState(null);
+    const [selectedSize, setSelectedSize] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState('description');
     const [zoomStyle, setZoomStyle] = useState({});
 
     useEffect(() => {
-        // Reset selection on product change
-        setSelectedImage(product.images[0]);
-        setSelectedColor(product.colors[0]);
-        setSelectedSize(product.sizes[0]);
-        setQuantity(1);
-    }, [product]);
+        const fetchProduct = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch(`http://localhost:5000/api/product/getProduct/${id}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch product');
+                }
+                const result = await response.json();
+                
+                const productData = result.data;
+                const formattedProduct = {
+                    ...productData,
+                    title: productData.name,
+                    images: productData.imageUpload?.length > 0 ? productData.imageUpload : ["https://placehold.co/600x600?text=No+Image"],
+                    brand: productData.category || "Unbranded",
+                    rating: 4.5,
+                    reviewCount: 150,
+                    stockParams: { status: productData.status, quantity: productData.stock },
+                    shortDescription: productData.description ? productData.description.substring(0, 100) + '...' : '',
+                    colors: [
+                        { name: 'Default', value: '#000000', inStock: true }
+                    ],
+                    sizes: [
+                        { name: 'Standard', inStock: true }
+                    ],
+                    specifications: [
+                        { label: "Category", value: productData.category },
+                        { label: "SKU", value: productData.sku },
+                        { label: "Stock", value: productData.stock }
+                    ],
+                    reviews: [],
+                    relatedProducts: []
+                };
+
+                setProduct(formattedProduct);
+                setSelectedImage(formattedProduct.images[0]);
+                setSelectedColor(formattedProduct.colors[0]);
+                setSelectedSize(formattedProduct.sizes[0]);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) {
+            fetchProduct();
+        }
+    }, [id]);
 
     const handleMouseMove = (e) => {
         const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
@@ -118,7 +162,13 @@ const ProductDetail = () => {
         });
     };
 
-    const discountPercentage = Math.round(((product.price - product.discountPrice) / product.price) * 100);
+    if (loading) return <div className="min-h-screen flex items-center justify-center text-xl text-gray-500">Loading product details...</div>;
+    if (error) return <div className="min-h-screen flex items-center justify-center text-xl text-red-500">{error}</div>;
+    if (!product) return <div className="min-h-screen flex items-center justify-center text-xl text-gray-500">Product not found.</div>;
+
+    const discountPercentage = product.discountPrice 
+        ? Math.round(((product.price - product.discountPrice) / product.price) * 100)
+        : 0;
 
     return (
         <div className="bg-gray-50 min-h-screen py-8 text-left">
@@ -188,8 +238,8 @@ const ProductDetail = () => {
 
                         {/* Price */}
                         <div className="flex items-end gap-3">
-                            <span className="text-3xl font-bold text-gray-900">${product.discountPrice}</span>
-                            <span className="text-xl text-gray-400 line-through mb-1">${product.price}</span>
+                            <span className="text-3xl font-bold text-gray-900">₹{product.discountPrice}</span>
+                            <span className="text-xl text-gray-400 line-through mb-1">₹{product.price}</span>
                         </div>
 
                         {/* Description */}
@@ -355,7 +405,7 @@ const ProductDetail = () => {
                                 </div>
                                 <div className="p-4">
                                     <h3 className="text-gray-900 font-medium truncate">{rel.title}</h3>
-                                    <p className="text-gray-500 text-sm mt-1">${rel.price}</p>
+                                    <p className="text-gray-500 text-sm mt-1">₹{rel.price}</p>
                                 </div>
                             </div>
                         ))}

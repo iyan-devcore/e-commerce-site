@@ -1,11 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Table from '../components/ui/Table';
 import Input from '../components/ui/Input';
-import { mockCustomers } from '../data/mockData';
 
 const Customers = () => {
-    const [customers, setCustomers] = useState(mockCustomers);
+    const [customers, setCustomers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        fetchCustomers();
+    }, []);
+
+    const fetchCustomers = async () => {
+        try {
+            const res = await fetch('http://localhost:5000/api/user/getUsers');
+            const data = await res.json();
+            if (data.data) {
+                const formatted = data.data.map(user => ({
+                    ...user,
+                    name: `${user.firstName} ${user.lastName}`,
+                    orders: Math.floor(Math.random() * 5), // Mock order count for aesthetic
+                    spent: Math.random() * 500 // Mock spent since user schema doesn't track this
+                }));
+                setCustomers(formatted);
+            }
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    };
 
     const filteredCustomers = customers.filter(customer => {
         return customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -39,7 +60,7 @@ const Customers = () => {
         {
             header: 'Total Spent',
             accessor: 'spent',
-            render: (row) => <span className="font-bold text-gray-900">${row.spent.toFixed(2)}</span>
+            render: (row) => <span className="font-bold text-gray-900">₹{row.spent.toFixed(2)}</span>
         },
     ];
 

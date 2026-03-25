@@ -1,12 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Dashboard = () => {
-    const stats = [
-        { name: 'Total Revenue', value: '$45,231.89', change: '+20.1%', trend: 'up' },
-        { name: 'Active Users', value: '2,338', change: '-1.5%', trend: 'down' },
-        { name: 'New Orders', value: '1,245', change: '+12.5%', trend: 'up' },
-        { name: 'Pending Issues', value: '12', change: '0%', trend: 'neutral' },
-    ];
+    const [stats, setStats] = useState([
+        { name: 'Total Revenue', value: '₹0.00', change: '0%', trend: 'neutral' },
+        { name: 'Registered Users', value: '0', change: '0%', trend: 'neutral' },
+        { name: 'Total Orders', value: '0', change: '0%', trend: 'neutral' },
+        { name: 'Total Products', value: '0', change: '0%', trend: 'neutral' },
+    ]);
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                const [usersRes, ordersRes, productsRes] = await Promise.all([
+                    fetch('http://localhost:5000/api/user/getUsers').then(r => r.json()),
+                    fetch('http://localhost:5000/api/order/getOrders').then(r => r.json()),
+                    fetch('http://localhost:5000/api/product/getProducts').then(r => r.json())
+                ]);
+
+                const totalRevenue = ordersRes.data ? ordersRes.data.reduce((acc, order) => acc + order.total, 0) : 0;
+                const totalUsers = usersRes.data ? usersRes.data.length : 0;
+                const totalOrdersNum = ordersRes.data ? ordersRes.data.length : 0;
+                const totalProducts = productsRes.data ? productsRes.data.length : 0;
+
+                setStats([
+                    { name: 'Total Revenue', value: `₹${totalRevenue.toFixed(2)}`, change: '-', trend: 'up' },
+                    { name: 'Registered Users', value: totalUsers.toString(), change: '-', trend: 'up' },
+                    { name: 'Total Orders', value: totalOrdersNum.toString(), change: '-', trend: 'up' },
+                    { name: 'Total Products', value: totalProducts.toString(), change: '-', trend: 'neutral' },
+                ]);
+            } catch (error) {
+                console.error("Error fetching dashboard data:", error);
+            }
+        };
+        fetchDashboardData();
+    }, []);
 
     return (
         <div className="space-y-6">

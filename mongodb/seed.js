@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import User from './modules/Users.js';
 import Product from './modules/Product.js';
+import Order from './modules/Order.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -10,80 +11,84 @@ const seedDatabase = async () => {
         await mongoose.connect("mongodb://localhost:27017/iyan");
         console.log("Connected to MongoDB for seeding...");
 
+        // 1. Remove all previous data
+        await User.deleteMany({});
+        await Product.deleteMany({});
+        await Order.deleteMany({});
+        console.log("Cleared existing data.");
+
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash("password123", salt);
 
-        const users = [
-            {
-                firstName: "Alex",
-                lastName: "Johnson",
-                email: "alex.johnson" + Date.now() + "@example.com",
+        // 2. Add at least 20 users
+        const users = [];
+        for (let i = 1; i <= 20; i++) {
+            users.push({
+                firstName: `FirstName${i}`,
+                lastName: `LastName${i}`,
+                email: `user${i}_${Date.now()}@example.com`,
                 password: hashedPassword,
-                imageUpload: "sample_user_1.jpg",
+                imageUpload: `sample_user_${i}.jpg`,
                 agreeTerms: true
-            },
-            {
-                firstName: "Samantha",
-                lastName: "Smith",
-                email: "sam.smith" + Date.now() + "@example.com",
-                password: hashedPassword,
-                imageUpload: "sample_user_2.jpg",
-                agreeTerms: true
-            }
-        ];
-
+            });
+        }
         const insertedUsers = await User.insertMany(users);
         console.log(`${insertedUsers.length} users inserted.`);
 
-        const products = [
-            {
-                name: "Wireless Headphones",
-                category: "Electronics",
-                price: 199.99,
-                discountPrice: 149.99,
-                stock: 50,
-                status: "Active",
-                sku: "WH-" + Date.now() + "-1",
-                description: "High-quality wireless headphones with noise cancellation.",
-                imageUpload: "sample_product_1.jpg"
-            },
-            {
-                name: "Running Shoes",
-                category: "Fashion",
-                price: 89.99,
-                discountPrice: 0,
-                stock: 120,
-                status: "Active",
-                sku: "RS-" + Date.now() + "-2",
-                description: "Lightweight and comfortable running shoes for everyday use.",
-                imageUpload: "sample_product_2.jpg"
-            },
-            {
-                name: "Smart Watch",
-                category: "Electronics",
-                price: 299.99,
-                discountPrice: 249.99,
-                stock: 30,
-                status: "Active",
-                sku: "SW-" + Date.now() + "-3",
-                description: "Track your fitness and stay connected with this smart watch.",
-                imageUpload: "sample_product_3.jpg"
-            },
-            {
-                name: "Coffee Mug",
-                category: "Home & Kitchen",
-                price: 14.99,
-                discountPrice: 9.99,
-                stock: 200,
-                status: "Active",
-                sku: "CM-" + Date.now() + "-4",
-                description: "Ceramic coffee mug with a sleek design.",
-                imageUpload: "sample_product_4.jpg"
-            }
-        ];
+        // 3. Add 10 products for each of the 3 categories
+        const categories = ["Electronics", "Fashion", "Home & Kitchen"];
+        const products = [];
+        let productCounter = 1;
 
+        for (const category of categories) {
+            for (let i = 1; i <= 10; i++) {
+                products.push({
+                    name: `${category} Product ${i}`,
+                    category: category,
+                    price: Math.floor(Math.random() * 100) + 20,
+                    discountPrice: Math.floor(Math.random() * 10),
+                    stock: Math.floor(Math.random() * 100) + 10,
+                    status: "Active",
+                    sku: `SKU-${category.substring(0,3).toUpperCase()}-${Date.now()}-${productCounter}`,
+                    description: `This is a great ${category.toLowerCase()} product.`,
+                    imageUpload: `sample_${category.toLowerCase().replace(" & ", "_")}_${i}.jpg`
+                });
+                productCounter++;
+            }
+        }
         const insertedProducts = await Product.insertMany(products);
         console.log(`${insertedProducts.length} products inserted.`);
+
+        // 4. Add at least 20 orders
+        const orders = [];
+        const paymentStatuses = ["Pending", "Paid", "Refunded"];
+        const orderStatuses = ["Processing", "Shipped", "Delivered", "Cancelled"];
+        const paymentMethods = ["Credit Card", "PayPal", "Bank Transfer"];
+
+        for (let i = 1; i <= 20; i++) {
+            // Randomly pick a product for the order
+            const randomProduct = products[Math.floor(Math.random() * products.length)];
+            const quantity = Math.floor(Math.random() * 3) + 1;
+            
+            orders.push({
+                customerName: `Customer ${i}`,
+                email: `customer${i}@example.com`,
+                total: randomProduct.price * quantity,
+                paymentStatus: paymentStatuses[Math.floor(Math.random() * paymentStatuses.length)],
+                orderStatus: orderStatuses[Math.floor(Math.random() * orderStatuses.length)],
+                paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
+                items: [
+                    {
+                        name: randomProduct.name,
+                        quantity: quantity,
+                        price: randomProduct.price
+                    }
+                ],
+                address: `${i * 10} Main St, City, Country`
+            });
+        }
+        const insertedOrders = await Order.insertMany(orders);
+        console.log(`${insertedOrders.length} orders inserted.`);
 
         console.log("Database seeded successfully!");
         mongoose.disconnect();

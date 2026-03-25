@@ -12,7 +12,7 @@ export const addProduct = async (req, res) => {
             status: req.body.status || "Active",
             sku: req.body.sku,
             description: req.body.description,
-            imageUpload: req.file ? req.file.filename : null
+            imageUpload: req.files ? req.files.map(file => file.filename) : []
         };
 
         const product = new Product(productData);
@@ -28,9 +28,15 @@ export const getProducts = async (req, res) => {
     try {
         const products = await Product.find();
         const productsWithImage = products.map((product) => {
+            let images = [];
+            if (Array.isArray(product.imageUpload)) {
+                images = product.imageUpload.map(img => `http://localhost:5000/uploads/${img}`);
+            } else if (product.imageUpload) {
+                images = [`http://localhost:5000/uploads/${product.imageUpload}`];
+            }
             return {
                 ...product._doc,
-                imageUpload: product.imageUpload ? `http://localhost:5000/uploads/${product.imageUpload}` : null
+                imageUpload: images
             };
         });
         res.status(200).json({ message: "Products fetched successfully", data: productsWithImage });
@@ -45,9 +51,16 @@ export const getProductById = async (req, res) => {
         const product = await Product.findById(req.params.id);
         if (!product) return res.status(404).json({ message: "Product not found" });
 
+        let images = [];
+        if (Array.isArray(product.imageUpload)) {
+            images = product.imageUpload.map(img => `http://localhost:5000/uploads/${img}`);
+        } else if (product.imageUpload) {
+            images = [`http://localhost:5000/uploads/${product.imageUpload}`];
+        }
+
         const productWithImage = {
             ...product._doc,
-            imageUpload: product.imageUpload ? `http://localhost:5000/uploads/${product.imageUpload}` : null
+            imageUpload: images
         };
 
         res.status(200).json({ message: "Product fetched successfully", data: productWithImage });
@@ -70,8 +83,8 @@ export const updateProduct = async (req, res) => {
             description: req.body.description
         };
 
-        if (req.file) {
-            updateData.imageUpload = req.file.filename;
+        if (req.files && req.files.length > 0) {
+            updateData.imageUpload = req.files.map(file => file.filename);
         }
 
         const product = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
