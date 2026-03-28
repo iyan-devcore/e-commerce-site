@@ -30,9 +30,9 @@ export const getProducts = async (req, res) => {
         const productsWithImage = products.map((product) => {
             let images = [];
             if (Array.isArray(product.imageUpload)) {
-                images = product.imageUpload.map(img => `http://localhost:5000/uploads/${img}`);
+                images = product.imageUpload.map(img => img.startsWith('http') ? img : `http://localhost:5000/uploads/${img}`);
             } else if (product.imageUpload) {
-                images = [`http://localhost:5000/uploads/${product.imageUpload}`];
+                images = product.imageUpload.startsWith('http') ? [product.imageUpload] : [`http://localhost:5000/uploads/${product.imageUpload}`];
             }
             return {
                 ...product._doc,
@@ -53,9 +53,9 @@ export const getProductById = async (req, res) => {
 
         let images = [];
         if (Array.isArray(product.imageUpload)) {
-            images = product.imageUpload.map(img => `http://localhost:5000/uploads/${img}`);
+            images = product.imageUpload.map(img => img.startsWith('http') ? img : `http://localhost:5000/uploads/${img}`);
         } else if (product.imageUpload) {
-            images = [`http://localhost:5000/uploads/${product.imageUpload}`];
+            images = product.imageUpload.startsWith('http') ? [product.imageUpload] : [`http://localhost:5000/uploads/${product.imageUpload}`];
         }
 
         const productWithImage = {

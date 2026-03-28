@@ -35,11 +35,53 @@ export const loginUser = async (req, res) => {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
-                imageUpload: user.imageUpload ? `http://localhost:5000/uploads/${user.imageUpload}` : null
+                imageUpload: user.imageUpload 
+                    ? (user.imageUpload.startsWith('http') ? user.imageUpload : `http://localhost:5000/uploads/${user.imageUpload}`) 
+                    : null
             } 
         });
     } catch (error) {
         res.status(500).json({ message: "Error during login", error: error.message });
+    }
+}
+
+export const googleLogin = async (req, res) => {
+    try {
+        const { email, firstName, lastName, picture } = req.body;
+        
+        // Find if user already exists
+        let user = await User.findOne({ email });
+        
+        if (!user) {
+            // Create user
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(email + Date.now().toString(), salt); // Random temp password
+            
+            user = new User({
+                firstName: firstName || 'Google User',
+                lastName: lastName || '',
+                email: email,
+                password: hashedPassword,
+                agreeTerms: true,
+                imageUpload: picture || null
+            });
+            await user.save();
+        }
+
+        res.status(200).json({ 
+            message: "Google Login successful", 
+            data: {
+                id: user._id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                imageUpload: user.imageUpload 
+                    ? (user.imageUpload.startsWith('http') ? user.imageUpload : `http://localhost:5000/uploads/${user.imageUpload}`) 
+                    : null
+            } 
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Error during Google login", error: error.message });
     }
 }
 
@@ -80,7 +122,9 @@ export const getUsers = async (req, res) => {
                 email: user.email,
                 agreeTerms: user.agreeTerms,
                 createdAt: user.createdAt,
-                imageUpload: user.imageUpload ? `http://localhost:5000/uploads/${user.imageUpload}` : null
+                imageUpload: user.imageUpload 
+                    ? (user.imageUpload.startsWith('http') ? user.imageUpload : `http://localhost:5000/uploads/${user.imageUpload}`) 
+                    : null
             }
         })
         res.status(200).json({ message: "Users fetched successfully", data: userwithimage });

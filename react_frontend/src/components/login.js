@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useGoogleLogin } from '@react-oauth/google';
 import CustomAlert from './CustomAlert';
 
 const MailIcon = () => (
@@ -54,6 +55,48 @@ const Login = () => {
         email: '',
         password: '',
         rememberMe: false
+    });
+
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                });
+                const userInfo = await userInfoResponse.json();
+
+                const backendResponse = await fetch('http://localhost:5000/api/user/googleLogin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: userInfo.email,
+                        firstName: userInfo.given_name,
+                        lastName: userInfo.family_name,
+                        picture: userInfo.picture,
+                    })
+                });
+
+                const data = await backendResponse.json();
+
+                if (backendResponse.ok) {
+                    setAlert({ show: true, message: 'Google Login successful!', type: 'success' });
+                    localStorage.setItem('user', JSON.stringify(data.data));
+                    window.dispatchEvent(new Event('cartUpdated'));
+                    setTimeout(() => {
+                        navigate('/');
+                    }, 1500);
+                } else {
+                    setAlert({ show: true, message: data.message || 'Google Login failed', type: 'error' });
+                }
+            } catch (error) {
+                console.error('Google Login error:', error);
+                setAlert({ show: true, message: 'Google Login failed. Please try again.', type: 'error' });
+            }
+        },
+        onError: errorResponse => {
+            console.error('Google login error:', errorResponse);
+            setAlert({ show: true, message: 'Google Login failed. Please try again.', type: 'error' });
+        },
     });
 
     const handleChange = (e) => {
@@ -217,7 +260,7 @@ const Login = () => {
                 </div>
 
                 <div className="flex gap-3">
-                    <button type="button" className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg py-2.5 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200">
+                    <button type="button" onClick={() => handleGoogleLogin()} className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg py-2.5 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200">
                         <GoogleIcon />
                         Google
                     </button>
