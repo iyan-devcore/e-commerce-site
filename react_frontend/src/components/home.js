@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const categories = [
@@ -10,15 +10,26 @@ const categories = [
     { id: 6, name: 'Toys', image: '/images/toys_cat.png', path: '/toys' },
 ];
 
-const products = [
-    { id: 1, name: 'Wireless Headphones', price: '₹2,499', image: '/images/headphones_prod.png', rating: 4.5 },
-    { id: 2, name: 'Smart Watch Series 7', price: '₹24,999', image: '/images/smartwatch_prod.png', rating: 4.8 },
-    { id: 3, name: 'Running Shoes', price: '₹3,999', image: '/images/runningshoes_prod.png', rating: 4.2 },
-    { id: 4, name: 'Leather Bag', price: '₹5,499', image: '/images/leatherbag_prod.png', rating: 4.7 },
-];
-
 const Home = () => {
     const navigate = useNavigate();
+    const [bestSellers, setBestSellers] = useState([]);
+
+    useEffect(() => {
+        const fetchRandomProducts = async () => {
+            try {
+                const res = await fetch('http://localhost:5000/api/product/getProducts');
+                const data = await res.json();
+                if (data.data && Array.isArray(data.data)) {
+                    // Shuffle the products array and pick the first 4
+                    const shuffled = [...data.data].sort(() => 0.5 - Math.random());
+                    setBestSellers(shuffled.slice(0, 4));
+                }
+            } catch (error) {
+                console.error('Error fetching best sellers:', error);
+            }
+        };
+        fetchRandomProducts();
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
@@ -67,24 +78,41 @@ const Home = () => {
                         <button className="text-blue-600 font-semibold hover:underline">View All</button>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-                        {products.map((product) => (
+                        {bestSellers.map((product) => (
                             <div
-                                key={product.id}
+                                key={product._id}
                                 className="bg-white rounded-lg shadow-sm hover:shadow-lg transition duration-300 border border-gray-100 overflow-hidden cursor-pointer"
-                                onClick={() => navigate(`/product/${product.id}`)}
+                                onClick={() => navigate(`/product/${product._id}`)}
                             >
-                                <div className="h-48 overflow-hidden bg-gray-100 relative group">
-                                    <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" />
+                                <div className="h-48 overflow-hidden bg-gray-100 relative group flex justify-center items-center p-2">
+                                    <img 
+                                        src={(product.imageUpload && product.imageUpload.length > 0) ? product.imageUpload[0] : "https://via.placeholder.com/300?text=No+Image"} 
+                                        alt={product.name} 
+                                        className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition duration-500" 
+                                        loading="lazy" 
+                                    />
                                     <div className="absolute top-2 right-2 bg-yellow-400 text-xs font-bold px-2 py-1 rounded">
-                                        {product.rating} ★
+                                        {product.rating || 4.5} ★
                                     </div>
+                                    {product.stock <= 0 && (
+                                        <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                                            Out of Stock
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="p-4">
+                                    <p className="text-gray-400 text-xs tracking-wider uppercase mb-1 font-semibold">{product.category}</p>
                                     <h3 className="font-semibold text-gray-800 text-lg mb-1 truncate">{product.name}</h3>
                                     <p className="text-gray-500 text-sm mb-3">Premium Quality</p>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-xl font-bold text-gray-900">{product.price}</span>
-                                        <button className="p-2 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition">
+                                        <span className="text-xl font-bold text-gray-900">₹{product.price}</span>
+                                        <button 
+                                            className="p-2 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate(`/product/${product._id}`);
+                                            }}
+                                        >
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                             </svg>

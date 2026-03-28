@@ -5,6 +5,8 @@ import Shop from "./components/shop";
 import Footer from "./components/Footer";
 import Register from "./components/register";
 import Login from "./components/login";
+import Profile from "./components/Profile";
+import Cart from "./components/Cart";
 import ErrorPage from "./components/error";
 import AdminLayout from "./admin/layout/AdminLayout";
 import AdminDashboard from "./admin/pages/Dashboard";
@@ -38,6 +40,8 @@ function App() {
         <Route path="/audio" element={<div style={{ padding: 20 }}>Audio Category</div>} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/cart" element={<Cart />} />
         <Route path="*" element={<ErrorPage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminLayout />}>

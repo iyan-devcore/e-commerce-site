@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 
 // --- Dummy Data ---
 const dummyProduct = {
@@ -83,6 +83,7 @@ const CheckIcon = () => (
 
 const ProductDetail = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -93,6 +94,40 @@ const ProductDetail = () => {
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState('description');
     const [zoomStyle, setZoomStyle] = useState({});
+
+    const handleAddToCart = () => {
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+            navigate('/login');
+            return;
+        }
+
+        const user = JSON.parse(storedUser);
+        const cartKey = `cart_${user.id}`;
+        let cart = JSON.parse(localStorage.getItem(cartKey)) || [];
+        
+        // Find if item already exists in cart with same color and size
+        const existingItemIndex = cart.findIndex(item => 
+            item.product._id === product._id && 
+            (item.color && selectedColor ? item.color.name === selectedColor.name : true) && 
+            (item.size && selectedSize ? item.size.name === selectedSize.name : true)
+        );
+        
+        if (existingItemIndex >= 0) {
+            cart[existingItemIndex].quantity += quantity;
+        } else {
+            cart.push({
+                product: product,
+                color: selectedColor,
+                size: selectedSize,
+                quantity: quantity
+            });
+        }
+        
+        localStorage.setItem(cartKey, JSON.stringify(cart));
+        window.dispatchEvent(new Event('cartUpdated'));
+        window.alert("Product added to your cart!");
+    };
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -311,7 +346,10 @@ const ProductDetail = () => {
                             </div>
 
                             {/* Add to Cart */}
-                            <button className="flex-1 bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20">
+                            <button 
+                                onClick={handleAddToCart}
+                                className="flex-1 bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20"
+                            >
                                 <ShoppingCartIcon />
                                 Add to Cart
                             </button>

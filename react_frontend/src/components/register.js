@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CustomAlert from './CustomAlert';
 
 // SVG Icons as components for cleaner code
@@ -54,6 +54,7 @@ const GithubIcon = () => (
 );
 
 const Register = () => {
+    const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [alert, setAlert] = useState({ show: false, message: '', type: 'error' });
     const [errors, setErrors] = useState({});
@@ -110,17 +111,37 @@ const Register = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         // Clear any previous success alert before attempting submission
         setAlert({ show: false, message: '', type: 'error' });
 
         if (validateForm()) {
-            console.log('Form submitted:', formData);
-            // Simulate successful registration
-            setAlert({ show: true, message: 'Account created successfully!', type: 'success' });
-            // Add registration logic here
+            try {
+                const response = await fetch('http://localhost:5000/api/user/addUser', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    setAlert({ show: true, message: 'Account created successfully!', type: 'success' });
+                    // Navigate to login after 2 seconds
+                    setTimeout(() => {
+                        navigate('/login');
+                    }, 2000);
+                } else {
+                    setAlert({ show: true, message: data.message || 'Registration failed', type: 'error' });
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                setAlert({ show: true, message: 'Network error. Please try again later.', type: 'error' });
+            }
         } else {
             // If validation fails, show a generic error alert if no specific field error is visible
             if (Object.keys(errors).length === 0) { // Only show if validateForm didn't set errors (shouldn't happen with current logic)

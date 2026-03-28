@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CustomAlert from './CustomAlert';
 
 const MailIcon = () => (
@@ -46,6 +46,7 @@ const GithubIcon = () => (
 );
 
 const Login = () => {
+    const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [alert, setAlert] = useState({ show: false, message: '', type: 'error' });
     const [errors, setErrors] = useState({});
@@ -87,17 +88,44 @@ const Login = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         // Clear previous alert
         setAlert({ show: false, message: '', type: 'error' });
 
         if (validateForm()) {
-            console.log('Form submitted:', formData);
-            // Simulate successful login
-            setAlert({ show: true, message: 'Login successful!', type: 'success' });
-            // Add login logic here
+            try {
+                const response = await fetch('http://localhost:5000/api/user/loginUser', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: formData.email,
+                        password: formData.password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    setAlert({ show: true, message: 'Login successful!', type: 'success' });
+                    // Save user to local storage if needed
+                    localStorage.setItem('user', JSON.stringify(data.data));
+                    window.dispatchEvent(new Event('cartUpdated'));
+                    
+                    // Navigate to home after short delay
+                    setTimeout(() => {
+                        navigate('/');
+                    }, 1500);
+                } else {
+                    setAlert({ show: true, message: data.message || 'Login failed', type: 'error' });
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                setAlert({ show: true, message: 'Network error. Please try again later.', type: 'error' });
+            }
         }
     };
 

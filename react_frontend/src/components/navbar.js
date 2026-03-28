@@ -1,8 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [cartCount, setCartCount] = useState(0);
+
+    const updateCartCount = () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user) {
+            const items = JSON.parse(localStorage.getItem(`cart_${user.id}`)) || [];
+            const count = items.reduce((total, item) => total + item.quantity, 0);
+            setCartCount(count);
+        } else {
+            setCartCount(0);
+        }
+    };
+
+    useEffect(() => {
+        updateCartCount();
+        window.addEventListener('cartUpdated', updateCartCount);
+        return () => window.removeEventListener('cartUpdated', updateCartCount);
+    }, []);
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -73,18 +91,20 @@ const Navbar = () => {
                             </svg>
                         </button>
 
-                        <button className="relative p-1 text-gray-600 hover:text-gray-900 hover:-translate-y-0.5 transition-all duration-200" aria-label="Cart">
+                        <Link to={localStorage.getItem('user') ? "/cart" : "/login"} className="relative p-1 text-gray-600 hover:text-gray-900 hover:-translate-y-0.5 transition-all duration-200" aria-label="Cart">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="9" cy="21" r="1"></circle>
                                 <circle cx="20" cy="21" r="1"></circle>
                                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                             </svg>
-                            <span className="absolute -top-1 -right-1.5 bg-red-500 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
-                                2
-                            </span>
-                        </button>
+                            {cartCount > 0 && (
+                                <span className="absolute -top-1 -right-1.5 bg-red-500 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">
+                                    {cartCount}
+                                </span>
+                            )}
+                        </Link>
 
-                        <Link to="/register" className="p-1 text-gray-600 hover:text-gray-900 hover:-translate-y-0.5 transition-all duration-200">
+                        <Link to={localStorage.getItem('user') ? "/profile" : "/register"} className="p-1 text-gray-600 hover:text-gray-900 hover:-translate-y-0.5 transition-all duration-200">
                             <button aria-label="Account">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
