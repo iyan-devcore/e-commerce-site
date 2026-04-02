@@ -9,7 +9,10 @@ const Products = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/product/getProducts');
+                const token = JSON.parse(localStorage.getItem('user'))?.token || "";
+                const response = await fetch('http://localhost:5000/api/product/getProducts', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 const data = await response.json();
                 if (data.data) {
                     setProducts(data.data);

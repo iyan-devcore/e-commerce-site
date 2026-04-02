@@ -25,7 +25,10 @@ const Products = () => {
 
     const fetchProducts = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/product/getProducts');
+            const token = JSON.parse(localStorage.getItem('user'))?.token || "";
+            const res = await fetch('http://localhost:5000/api/product/getProducts', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             const data = await res.json();
             if (data.data) setProducts(data.data);
         } catch (error) {
@@ -50,7 +53,11 @@ const Products = () => {
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
             try {
-                await fetch(`http://localhost:5000/api/product/deleteProduct/${id}`, { method: 'DELETE' });
+                const token = JSON.parse(localStorage.getItem('user'))?.token || "";
+                await fetch(`http://localhost:5000/api/product/deleteProduct/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 fetchProducts();
             } catch (error) {
                 console.error(error);
@@ -83,14 +90,17 @@ const Products = () => {
         });
 
         try {
+            const token = JSON.parse(localStorage.getItem('user'))?.token || "";
             if (currentProduct) {
                 await fetch(`http://localhost:5000/api/product/updateProduct/${currentProduct._id}`, {
                     method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` },
                     body: formDataObj
                 });
             } else {
                 await fetch('http://localhost:5000/api/product/addProduct', {
                     method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
                     body: formDataObj
                 });
             }

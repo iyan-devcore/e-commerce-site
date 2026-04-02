@@ -20,7 +20,10 @@ const Shop = () => {
 
     const fetchProducts = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/product/getProducts');
+            const token = JSON.parse(localStorage.getItem('user'))?.token || "";
+            const res = await fetch('http://localhost:5000/api/product/getProducts', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             const data = await res.json();
             if (data.data) {
                 setProducts(data.data);

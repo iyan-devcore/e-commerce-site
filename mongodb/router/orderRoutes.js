@@ -8,7 +8,11 @@ import {
 } from "../controller/orderControl.js";
 import { imageUpload } from "../controller/usercontrol.js";
 
+import { authMiddleware } from "../utils/authmiddleware.js";
+
 const router = express.Router();
+
+router.use(authMiddleware);
 
 router.post('/createOrder', imageUpload.none(), createOrder);
 router.get('/getOrders', getOrders);

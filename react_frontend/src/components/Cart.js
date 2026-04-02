@@ -167,7 +167,7 @@ const Cart = () => {
                                     </div>
                                 </div>
 
-                                <button className="w-full bg-blue-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20 mb-4">
+                                <button onClick={() => navigate('/checkout')} className="w-full bg-blue-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20 mb-4">
                                     Proceed to Checkout
                                 </button>
                                 <Link to="/shop" className="block text-center text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors">

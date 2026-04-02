@@ -1,6 +1,8 @@
 import User from "../modules/Users.js";
 import multer from "multer";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { JWT_SECRET } from "../secret.js";
 
 export const imageUpload = multer({
     storage: multer.diskStorage({
@@ -35,6 +37,7 @@ export const loginUser = async (req, res) => {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
+                token: jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "30d" }),
                 imageUpload: user.imageUpload 
                     ? (user.imageUpload.startsWith('http') ? user.imageUpload : `http://localhost:5000/uploads/${user.imageUpload}`) 
                     : null

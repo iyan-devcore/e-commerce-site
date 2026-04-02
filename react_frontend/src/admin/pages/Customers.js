@@ -12,7 +12,10 @@ const Customers = () => {
 
     const fetchCustomers = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/user/getUsers');
+            const token = JSON.parse(localStorage.getItem('user'))?.token || "";
+            const res = await fetch('http://localhost:5000/api/user/getUsers', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             const data = await res.json();
             if (data.data) {
                 const formatted = data.data.map(user => ({

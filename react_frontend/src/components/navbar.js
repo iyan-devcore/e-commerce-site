@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [cartCount, setCartCount] = useState(0);
+    const navigate = useNavigate();
+    
+    // Search states
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [searchResults, setSearchResults] = useState([]);
+    const [allProducts, setAllProducts] = useState([]);
 
     const updateCartCount = () => {
         const user = JSON.parse(localStorage.getItem('user'));
@@ -19,8 +26,41 @@ const Navbar = () => {
     useEffect(() => {
         updateCartCount();
         window.addEventListener('cartUpdated', updateCartCount);
+        
+        // Fetch all products for search filtering
+        const fetchProducts = async () => {
+            const token = JSON.parse(localStorage.getItem('user'))?.token || "";
+            if (!token) return;
+            try {
+                const res = await fetch('http://localhost:5000/api/product/getProducts', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.data) {
+                    setAllProducts(data.data);
+                }
+            } catch(e) {
+                console.error("Search fetch error", e);
+            }
+        };
+        fetchProducts();
+        
         return () => window.removeEventListener('cartUpdated', updateCartCount);
     }, []);
+
+    // Instant Search Logic
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            setSearchResults([]);
+            return;
+        }
+        const lowerQ = searchQuery.toLowerCase();
+        const filtered = allProducts.filter(p => 
+            (p.name && p.name.toLowerCase().includes(lowerQ)) || 
+            (p.title && p.title.toLowerCase().includes(lowerQ))
+        );
+        setSearchResults(filtered.slice(0, 5)); // Keep dropdown clean with top 5
+    }, [searchQuery, allProducts]);
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -72,16 +112,71 @@ const Navbar = () => {
                 {/* Search and Icons */}
                 <div className="flex items-center gap-4 lg:gap-6">
                     {/* Search Bar - Hidden on small screens */}
-                    <div className="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 w-[260px] focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-100 focus-within:shadow-sm border border-transparent focus-within:border-blue-500 transition-all duration-200">
-                        <svg className="w-5 h-5 text-gray-400 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                        <input
-                            type="text"
-                            placeholder="Search products..."
-                            className="bg-transparent border-none outline-none text-sm text-gray-700 w-full placeholder-gray-400"
-                        />
+                    <div className="relative hidden md:block z-50">
+                        <div className={`flex items-center bg-gray-100 rounded-full px-4 py-2 transition-all duration-300 ease-out border border-transparent ${isSearchFocused ? 'w-[350px] bg-white ring-2 ring-blue-100 shadow-md border-blue-500' : 'w-[260px] hover:bg-gray-200 hover:w-[280px]'}`}>
+                            <svg className={`w-5 h-5 transition-colors duration-200 mr-2 ${isSearchFocused ? 'text-blue-500' : 'text-gray-400'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input
+                                type="text"
+                                placeholder="Search products..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onFocus={() => setIsSearchFocused(true)}
+                                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)} // Delay so click on result works
+                                className="bg-transparent border-none outline-none text-sm text-gray-700 w-full placeholder-gray-400"
+                            />
+                            {searchQuery && (
+                                <button onClick={() => { setSearchQuery(''); setIsSearchFocused(true); }} className="text-gray-400 hover:text-gray-600 transition-colors ml-1">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            )}
+                        </div>
+                        
+                        {/* Search Results Dropdown Drop */}
+                        <div className={`absolute top-full right-0 mt-3 w-[350px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden transition-all duration-300 origin-top transform ${isSearchFocused && searchQuery ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-4 pointer-events-none'}`}>
+                            {searchResults.length > 0 ? (
+                                <div className="py-2 flex flex-col">
+                                    {searchResults.map((product) => (
+                                        <div 
+                                            key={product._id} 
+                                            onClick={() => { navigate(`/product/${product._id}`); setSearchQuery(''); setIsSearchFocused(false); }}
+                                            className="flex items-center px-4 py-3 hover:bg-blue-50/50 cursor-pointer transition-colors group border-b border-gray-50 last:border-0"
+                                        >
+                                            <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center p-1">
+                                                <img 
+                                                    src={product.images ? product.images[0] : (product.imageUpload ? product.imageUpload[0] : 'https://via.placeholder.com/50')} 
+                                                    alt={product.name || product.title} 
+                                                    className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-300"
+                                                />
+                                            </div>
+                                            <div className="ml-4 flex-1">
+                                                <h4 className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">{product.name || product.title}</h4>
+                                                <p className="text-xs text-gray-500 mt-0.5">{product.category}</p>
+                                            </div>
+                                            <div className="font-bold text-sm text-gray-900">
+                                                ₹{product.discountPrice || product.price}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <div className="px-4 py-3 bg-gray-50 text-center border-t border-gray-100">
+                                        <span className="text-xs font-bold text-blue-600 hover:text-blue-700 cursor-pointer transition-colors w-full inline-block" onClick={() => { navigate('/shop'); setSearchQuery(''); setIsSearchFocused(false); }}>
+                                            View all matching results
+                                        </span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="p-8 text-center">
+                                    <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <p className="text-sm text-gray-500">No products found for "{searchQuery}"</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-4">

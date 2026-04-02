@@ -133,7 +133,10 @@ const ProductDetail = () => {
         const fetchProduct = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`http://localhost:5000/api/product/getProduct/${id}`);
+                const token = JSON.parse(localStorage.getItem('user'))?.token || "";
+                const response = await fetch(`http://localhost:5000/api/product/getProduct/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 if (!response.ok) {
                     throw new Error('Failed to fetch product');
                 }

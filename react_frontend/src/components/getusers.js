@@ -6,7 +6,10 @@ const GetUsers = () => {
     const [search, setSearch] = React.useState("");
 
     React.useEffect(() => {
-        axios.get("http://localhost:5000/api/user/getUsers").then((res) => {
+        const token = JSON.parse(localStorage.getItem('user'))?.token || "";
+        axios.get("http://localhost:5000/api/user/getUsers", {
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).then((res) => {
             setUsers(res.data);
         });
     }, []);

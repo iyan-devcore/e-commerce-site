@@ -9,6 +9,7 @@ export const createOrder = async (req, res) => {
         }
 
         const orderData = {
+            userId: req.user.id,
             customerName: req.body.customerName,
             email: req.body.email,
             total: req.body.total,
