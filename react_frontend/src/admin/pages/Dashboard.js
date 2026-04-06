@@ -14,9 +14,9 @@ const Dashboard = () => {
                 const token = JSON.parse(localStorage.getItem('user'))?.token || "";
                 const requestOptions = { headers: { 'Authorization': `Bearer ${token}` } };
                 const [usersRes, ordersRes, productsRes] = await Promise.all([
-                    fetch('http://localhost:5000/api/user/getUsers', requestOptions).then(r => r.json()),
-                    fetch('http://localhost:5000/api/order/getOrders', requestOptions).then(r => r.json()),
-                    fetch('http://localhost:5000/api/product/getProducts', requestOptions).then(r => r.json())
+                    fetch(`${process.env.REACT_APP_API_URL}/user/getUsers`, requestOptions).then(r => r.json()),
+                    fetch(`${process.env.REACT_APP_API_URL}/order/getOrders`, requestOptions).then(r => r.json()),
+                    fetch(`${process.env.REACT_APP_API_URL}/product/getProducts`, requestOptions).then(r => r.json())
                 ]);
 
                 const totalRevenue = ordersRes.data ? ordersRes.data.reduce((acc, order) => acc + order.total, 0) : 0;

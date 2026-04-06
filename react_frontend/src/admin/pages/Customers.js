@@ -13,7 +13,7 @@ const Customers = () => {
     const fetchCustomers = async () => {
         try {
             const token = JSON.parse(localStorage.getItem('user'))?.token || "";
-            const res = await fetch('http://localhost:5000/api/user/getUsers', {
+            const res = await fetch(`${process.env.REACT_APP_API_URL}/user/getUsers`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();

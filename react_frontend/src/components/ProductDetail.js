@@ -134,7 +134,7 @@ const ProductDetail = () => {
             try {
                 setLoading(true);
                 const token = JSON.parse(localStorage.getItem('user'))?.token || "";
-                const response = await fetch(`http://localhost:5000/api/product/getProduct/${id}`, {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/product/getProduct/${id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!response.ok) {

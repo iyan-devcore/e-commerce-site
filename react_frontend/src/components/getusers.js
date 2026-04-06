@@ -7,7 +7,7 @@ const GetUsers = () => {
 
     React.useEffect(() => {
         const token = JSON.parse(localStorage.getItem('user'))?.token || "";
-        axios.get("http://localhost:5000/api/user/getUsers", {
+        axios.get(`${process.env.REACT_APP_API_URL}/user/getUsers`, {
             headers: { 'Authorization': `Bearer ${token}` }
         }).then((res) => {
             setUsers(res.data);

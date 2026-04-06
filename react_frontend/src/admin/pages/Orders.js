@@ -17,7 +17,7 @@ const Orders = () => {
     const fetchOrders = async () => {
         try {
             const token = JSON.parse(localStorage.getItem('user'))?.token || "";
-            const response = await fetch('http://localhost:5000/api/order/getOrders', {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/order/getOrders`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -42,7 +42,7 @@ const Orders = () => {
     const handleUpdateOrder = async () => {
         try {
             const token = JSON.parse(localStorage.getItem('user'))?.token || "";
-            await fetch(`http://localhost:5000/api/order/updateOrder/${selectedOrder._id}`, {
+            await fetch(`${process.env.REACT_APP_API_URL}/order/updateOrder/${selectedOrder._id}`, {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ const Orders = () => {
         if(window.confirm("Are you sure you want to delete this order?")) {
             try {
                 const token = JSON.parse(localStorage.getItem('user'))?.token || "";
-                await fetch(`http://localhost:5000/api/order/deleteOrder/${id}`, {
+                await fetch(`${process.env.REACT_APP_API_URL}/order/deleteOrder/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });

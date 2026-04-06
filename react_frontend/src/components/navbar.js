@@ -32,7 +32,7 @@ const Navbar = () => {
             const token = JSON.parse(localStorage.getItem('user'))?.token || "";
             if (!token) return;
             try {
-                const res = await fetch('http://localhost:5000/api/product/getProducts', {
+                const res = await fetch(`${process.env.REACT_APP_API_URL}/product/getProducts`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();

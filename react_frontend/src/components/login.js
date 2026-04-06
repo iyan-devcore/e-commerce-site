@@ -65,7 +65,7 @@ const Login = () => {
                 });
                 const userInfo = await userInfoResponse.json();
 
-                const backendResponse = await fetch('http://localhost:5000/api/user/googleLogin', {
+                const backendResponse = await fetch(`${process.env.REACT_APP_API_URL}/user/googleLogin`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -139,7 +139,7 @@ const Login = () => {
 
         if (validateForm()) {
             try {
-                const response = await fetch('http://localhost:5000/api/user/loginUser', {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/user/loginUser`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

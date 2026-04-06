@@ -9,7 +9,7 @@ const Orders = () => {
         const fetchOrders = async () => {
             try {
                 const token = JSON.parse(localStorage.getItem('user'))?.token || "";
-                const response = await fetch('http://localhost:5000/api/order/getOrders', {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/order/getOrders`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await response.json();
