@@ -18,6 +18,8 @@ import AdminCustomers from "./admin/pages/Customers";
 import AdminSettings from "./admin/pages/Settings";
 import ProductDetail from "./components/ProductDetail";
 import GetUsers from "./components/getusers";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminProtectedRoute from "./admin/components/AdminProtectedRoute";
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 function App() {
@@ -41,12 +43,12 @@ function App() {
         <Route path="/audio" element={<div style={{ padding: 20 }}>Audio Category</div>} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+        <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
         <Route path="*" element={<ErrorPage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin/*" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
           <Route index element={<AdminDashboard />} />
           <Route path="products" element={<AdminProducts />} />
           <Route path="orders" element={<AdminOrders />} />
