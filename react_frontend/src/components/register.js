@@ -58,6 +58,9 @@ const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [alert, setAlert] = useState({ show: false, message: '', type: 'error' });
     const [errors, setErrors] = useState({});
+    const [showEmailSent, setShowEmailSent] = useState(false);
+    const [registeredEmail, setRegisteredEmail] = useState('');
+    const [resendLoading, setResendLoading] = useState(false);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -130,11 +133,8 @@ const Register = () => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    setAlert({ show: true, message: 'Account created successfully!', type: 'success' });
-                    // Navigate to login after 2 seconds
-                    setTimeout(() => {
-                        navigate('/login');
-                    }, 2000);
+                    setRegisteredEmail(data.data?.email || formData.email);
+                    setShowEmailSent(true);
                 } else {
                     setAlert({ show: true, message: data.message || 'Registration failed', type: 'error' });
                 }
@@ -143,8 +143,7 @@ const Register = () => {
                 setAlert({ show: true, message: 'Network error. Please try again later.', type: 'error' });
             }
         } else {
-            // If validation fails, show a generic error alert if no specific field error is visible
-            if (Object.keys(errors).length === 0) { // Only show if validateForm didn't set errors (shouldn't happen with current logic)
+            if (Object.keys(errors).length === 0) {
                 setAlert({ show: true, message: 'Please correct the errors in the form.', type: 'error' });
             }
         }
@@ -159,6 +158,49 @@ const Register = () => {
                     onClose={() => setAlert({ ...alert, show: false })}
                 />
             )}
+            
+            {showEmailSent ? (
+                <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-10 text-center">
+                    <div className="flex items-center justify-center mb-6">
+                        <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
+                            <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Check your email!</h2>
+                    <p className="text-sm text-gray-500 mb-1">We sent a verification link to</p>
+                    <p className="font-semibold text-gray-800 mb-6">{registeredEmail}</p>
+                    <p className="text-sm text-gray-500 mb-8">Click the <strong>"Verify My Email"</strong> button in the email to activate your account. The link expires in 24 hours.</p>
+                    <button
+                        type="button"
+                        disabled={resendLoading}
+                        onClick={async () => {
+                            setResendLoading(true);
+                            setAlert({ show: false, message: '', type: 'error' });
+                            try {
+                                const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/resend-verification`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email: registeredEmail })
+                                });
+                                const d = await res.json();
+                                setAlert({ show: true, message: d.message, type: res.ok ? 'success' : 'error' });
+                            } catch {
+                                setAlert({ show: true, message: 'Network error', type: 'error' });
+                            } finally {
+                                setResendLoading(false);
+                            }
+                        }}
+                        className="text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline focus:outline-none disabled:opacity-50"
+                    >
+                        {resendLoading ? 'Sending...' : "Didn't receive email? Resend"}
+                    </button>
+                    <div className="mt-6 pt-6 border-t border-gray-100">
+                        <Link to="/login" className="text-sm text-gray-500 hover:text-gray-700">← Back to login</Link>
+                    </div>
+                </div>
+            ) : (
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 md:p-10">
                 <div className="text-center mb-8">
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Create an account</h2>
@@ -290,6 +332,7 @@ const Register = () => {
                     Already have an account? <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500 hover:underline">Sign in</Link>
                 </p>
             </div>
+            )}
         </div>
     );
 };

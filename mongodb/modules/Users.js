@@ -8,6 +8,9 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: [true, "Password is required"] },
     imageUpload: { type: String, default: null },
     agreeTerms: { type: Boolean, required: true },
+    isVerified: { type: Boolean, default: false },
+    verificationToken: { type: String, default: null },
+    verificationTokenExpires: { type: Date, default: null },
 }, { timestamps: true });
 
 const User = mongoose.model("users", userSchema);

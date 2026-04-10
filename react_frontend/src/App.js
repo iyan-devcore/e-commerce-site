@@ -7,6 +7,7 @@ import Register from "./components/register";
 import Login from "./components/login";
 import Profile from "./components/Profile";
 import Cart from "./components/Cart";
+import VerifyEmail from "./components/VerifyEmail";
 import Checkout from "./components/checkout";
 import ErrorPage from "./components/error";
 import AdminLayout from "./admin/layout/AdminLayout";
@@ -46,6 +47,7 @@ function App() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
         <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="*" element={<ErrorPage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/*" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
