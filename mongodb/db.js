@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
-mongoose.connect("mongodb://localhost:27017/iyan");
+const mongoURI = process.env.MONGO_URI || "mongodb://localhost:27017/iyan";
+mongoose.connect(mongoURI);
 
 const db = mongoose.connection;
 

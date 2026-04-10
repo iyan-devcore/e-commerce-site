@@ -12,12 +12,13 @@ import { authMiddleware } from "../utils/authmiddleware.js";
 
 const router = express.Router();
 
-router.use(authMiddleware);
-
-router.post('/addProduct', imageUpload.array('imageUpload', 5), addProduct);
+// Public routes (No authentication required)
 router.get('/getProducts', getProducts);
 router.get('/getProduct/:id', getProductById);
-router.put('/updateProduct/:id', imageUpload.array('imageUpload', 5), updateProduct);
-router.delete('/deleteProduct/:id', deleteProduct);
+
+// Protected routes (Admin/Auth required)
+router.post('/addProduct', authMiddleware, imageUpload.array('imageUpload', 5), addProduct);
+router.put('/updateProduct/:id', authMiddleware, imageUpload.array('imageUpload', 5), updateProduct);
+router.delete('/deleteProduct/:id', authMiddleware, deleteProduct);
 
 export default router;
