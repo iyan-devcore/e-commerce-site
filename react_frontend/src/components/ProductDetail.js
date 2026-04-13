@@ -51,6 +51,10 @@ const ProductDetail = () => {
     const [myReviewId, setMyReviewId] = useState(null);
     const loggedInUser = JSON.parse(localStorage.getItem('user'));
 
+    // Recommendations
+    const [recommendations, setRecommendations] = useState([]);
+    const [recsLoading, setRecsLoading] = useState(false);
+
     const handleAddToCart = () => {
         const storedUser = localStorage.getItem('user');
         if (!storedUser) {
@@ -175,6 +179,24 @@ const ProductDetail = () => {
         };
         fetchReviews();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id]);
+
+    // Fetch recommendations whenever product id changes
+    useEffect(() => {
+        if (!id) return;
+        const fetchRecs = async () => {
+            setRecsLoading(true);
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_URL}/recommendations/${id}?limit=6`);
+                const data = await res.json();
+                if (data.success) setRecommendations(data.data);
+            } catch (e) {
+                console.error('Failed to load recommendations', e);
+            } finally {
+                setRecsLoading(false);
+            }
+        };
+        fetchRecs();
     }, [id]);
 
     const handleSubmitReview = async (e) => {
@@ -623,23 +645,80 @@ const ProductDetail = () => {
                     </div>
                 </div>
 
-                {/* Related Products */}
+                {/* ── Products You May Also Like ─────────────────────── */}
                 <div className="mt-16">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Products</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {product.relatedProducts.map(rel => (
-                            <div key={rel.id} className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all">
-                                <div className="aspect-square relative overflow-hidden bg-gray-100">
-                                    <img src={rel.image} alt={rel.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                </div>
-                                <div className="p-4">
-                                    <h3 className="text-gray-900 font-medium truncate">{rel.title}</h3>
-                                    <p className="text-gray-500 text-sm mt-1">₹{rel.price}</p>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h2 className="text-2xl font-bold text-gray-900">Products You May Also Like</h2>
+                            <p className="text-sm text-gray-500 mt-1">Recommended based on purchase patterns</p>
+                        </div>
+                        <span className="hidden sm:inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-blue-100">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            AI Powered
+                        </span>
                     </div>
+
+                    {recsLoading ? (
+                        /* Shimmer skeleton */
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="animate-pulse bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
+                                    <div className="aspect-square bg-gray-200" />
+                                    <div className="p-3 space-y-2">
+                                        <div className="h-3 bg-gray-200 rounded w-3/4" />
+                                        <div className="h-3 bg-gray-200 rounded w-1/2" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : recommendations.length === 0 ? (
+                        <div className="text-center py-12 text-gray-400">
+                            <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
+                            </svg>
+                            <p className="text-sm">No recommendations yet — start shopping to unlock personalised picks!</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                            {recommendations.map(rec => (
+                                <Link
+                                    key={rec._id}
+                                    to={`/product/${rec._id}`}
+                                    className="group bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200"
+                                >
+                                    {/* Image */}
+                                    <div className="aspect-square bg-gray-50 overflow-hidden">
+                                        <img
+                                            src={rec.image || 'https://placehold.co/300x300?text=No+Image'}
+                                            alt={rec.name}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        />
+                                    </div>
+                                    {/* Info */}
+                                    <div className="p-3">
+                                        <h3 className="text-xs font-semibold text-gray-900 line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors">{rec.name}</h3>
+                                        <div className="flex items-center gap-1.5 mt-2">
+                                            {rec.discountPrice && rec.discountPrice > 0 ? (
+                                                <>
+                                                    <span className="text-sm font-bold text-gray-900">₹{rec.discountPrice}</span>
+                                                    <span className="text-xs text-gray-400 line-through">₹{rec.price}</span>
+                                                </>
+                                            ) : (
+                                                <span className="text-sm font-bold text-gray-900">₹{rec.price}</span>
+                                            )}
+                                        </div>
+                                        <span className="mt-2 inline-block text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium capitalize">{rec.category}</span>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </div>
+
 
             </div>
         </div>

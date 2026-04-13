@@ -11,6 +11,8 @@ import productRoutes from './router/productRoutes.js';
 import orderRoutes from './router/orderRoutes.js';
 import wishlistRoutes from './router/wishlistRoutes.js';
 import reviewRoutes from './router/reviewRoutes.js';
+import recommendationRoutes from './router/recommendationRoutes.js';
+import chatbotRoutes from './router/chatbotRoutes.js';
 
 const app = express();
 
@@ -29,6 +31,10 @@ app.use("/api/product", productRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/review", reviewRoutes);
+app.use("/api/recommendations", recommendationRoutes);
+app.use("/api/chatbot", chatbotRoutes);
+
+
 
 app.use('/uploads', express.static('uploads'));
 

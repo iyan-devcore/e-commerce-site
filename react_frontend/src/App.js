@@ -19,6 +19,7 @@ const VerifyEmail = lazy(() => import('./components/VerifyEmail'));
 const Checkout = lazy(() => import('./components/checkout'));
 const ErrorPage = lazy(() => import('./components/error'));
 const GetUsers = lazy(() => import('./components/getusers'));
+const ChatbotWidget = lazy(() => import('./components/ChatbotWidget'));
 
 // Lazy load admin pages
 const AdminLayout = lazy(() => import('./admin/layout/AdminLayout'));
@@ -91,6 +92,7 @@ function App() {
       </main>
 
       {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <ChatbotWidget />}
     </div>
   );
 }
