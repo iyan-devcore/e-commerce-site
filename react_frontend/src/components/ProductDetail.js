@@ -1,53 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 
-// --- Dummy Data ---
-const dummyProduct = {
-    id: 1,
-    title: "Premium Wireless Noise-Cancelling Headphones",
-    brand: "Sony",
-    rating: 4.8,
-    reviewCount: 256,
-    price: 349.99,
-    discountPrice: 299.99,
-    stockParams: {
-        status: "In Stock",
-        quantity: 15
-    },
-    shortDescription: "Experience industry-leading noise cancellation, exceptional sound quality, and all-day comfort with these premium headphones.",
-    description: "Immerse yourself in music with our industry-leading noise cancellation technology. These headphones feature a premium design, long battery life, and smart listening technology that automatically adjusts your ambient sound settings.",
-    specifications: [
-        { label: "Battery Life", value: "30 hours" },
-        { label: "Weight", value: "254g" },
-        { label: "Bluetooth", value: "5.0" },
-        { label: "Driver Unit", value: "40mm, Dome type" },
-        { label: "Connectors", value: "USB-C, 3.5mm jack" }
-    ],
-    images: [
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1572569028738-411a54fb142a?q=80&w=1000&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1524678606375-71c3ae099eb1?q=80&w=1000&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=1000&auto=format&fit=crop"
-    ],
-    colors: [
-        { name: 'Black', value: '#000000', inStock: true },
-        { name: 'Silver', value: '#C0C0C0', inStock: true },
-        { name: 'Blue', value: '#0000FF', inStock: false }
-    ],
-    sizes: [
-        { name: 'Standard', inStock: true },
-        { name: 'XL Earpads', inStock: true }
-    ],
-    reviews: [
-        { id: 1, user: "John Doe", rating: 5, comment: "Amazing sound quality!", date: "2023-10-15" },
-        { id: 2, user: "Jane Smith", rating: 4, comment: "Great, but a bit pricey.", date: "2023-10-20" },
-    ],
-    relatedProducts: [
-        { id: 2, title: "Wireless Earbuds", price: 129.99, image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=1000&auto=format&fit=crop" },
-        { id: 3, title: "Smart Speaker", price: 89.99, image: "https://images.unsplash.com/photo-1589492477829-5e65395b66cc?q=80&w=1000&auto=format&fit=crop" },
-        { id: 4, title: "Bluetooth Adapter", price: 29.99, image: "https://images.unsplash.com/photo-1563770095-39d69aa23756?q=80&w=1000&auto=format&fit=crop" }
-    ]
-};
 
 // --- SVG Icons ---
 const StarIcon = ({ filled }) => (
@@ -56,17 +9,6 @@ const StarIcon = ({ filled }) => (
     </svg>
 );
 
-const HeartIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-    </svg>
-);
-
-const ShareIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-    </svg>
-);
 
 const ShoppingCartIcon = () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,6 +29,7 @@ const ProductDetail = () => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isInWishlist, setIsInWishlist] = useState(false);
 
     const [selectedImage, setSelectedImage] = useState(null);
     const [selectedColor, setSelectedColor] = useState(null);
@@ -171,6 +114,18 @@ const ProductDetail = () => {
                 setSelectedImage(formattedProduct.images[0]);
                 setSelectedColor(formattedProduct.colors[0]);
                 setSelectedSize(formattedProduct.sizes[0]);
+
+                // Also check if it's in wishlist if logged in
+                if (token) {
+                    const wishRes = await fetch(`${process.env.REACT_APP_API_URL}/wishlist/`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const wishData = await wishRes.json();
+                    if (wishData.success && wishData.wishlist.products.some(p => p._id === id || p === id)) {
+                        setIsInWishlist(true);
+                    }
+                }
+
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -198,6 +153,31 @@ const ProductDetail = () => {
             transformOrigin: 'center center',
             transform: 'scale(1)'
         });
+    };
+
+    const handleWishlistToggle = async () => {
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+            navigate('/login');
+            return;
+        }
+        const token = JSON.parse(storedUser).token;
+        try {
+            const res = await fetch(`${process.env.REACT_APP_API_URL}/wishlist/toggle`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ productId: product._id })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setIsInWishlist(data.action === "added");
+            }
+        } catch (error) {
+            console.error("Error toggling wishlist", error);
+        }
     };
 
     if (loading) return <div className="min-h-screen flex items-center justify-center text-xl text-gray-500">Loading product details...</div>;
@@ -358,8 +338,13 @@ const ProductDetail = () => {
                             </button>
 
                             {/* Wishlist Button */}
-                            <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors">
-                                <HeartIcon />
+                            <button 
+                                onClick={handleWishlistToggle}
+                                className={`p-3 border rounded-lg transition-colors ${isInWishlist ? 'border-red-500 bg-red-50 text-red-500 hover:bg-red-100' : 'border-gray-300 hover:bg-gray-50 text-gray-600'}`}
+                            >
+                                <svg className="w-5 h-5" fill={isInWishlist ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
                             </button>
                         </div>
 

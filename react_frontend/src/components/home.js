@@ -13,6 +13,7 @@ const categories = [
 const Home = () => {
     const navigate = useNavigate();
     const [bestSellers, setBestSellers] = useState([]);
+    const [wishlist, setWishlist] = useState([]);
 
     useEffect(() => {
         const fetchRandomProducts = async () => {
@@ -27,12 +28,51 @@ const Home = () => {
                     const shuffled = [...data.data].sort(() => 0.5 - Math.random());
                     setBestSellers(shuffled.slice(0, 4));
                 }
+                if (token) {
+                    const wishRes = await fetch(`${process.env.REACT_APP_API_URL}/wishlist/`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const wishData = await wishRes.json();
+                    if (wishData.success) {
+                        setWishlist(wishData.wishlist.products.map(p => p._id || p));
+                    }
+                }
             } catch (error) {
                 console.error('Error fetching best sellers:', error);
             }
         };
         fetchRandomProducts();
     }, []);
+
+    const handleWishlistToggle = async (e, productId) => {
+        e.stopPropagation();
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+            navigate('/login');
+            return;
+        }
+        const token = JSON.parse(storedUser).token;
+        try {
+            const res = await fetch(`${process.env.REACT_APP_API_URL}/wishlist/toggle`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ productId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (data.action === "added") {
+                    setWishlist([...wishlist, productId]);
+                } else {
+                    setWishlist(wishlist.filter(id => id !== productId));
+                }
+            }
+        } catch (error) {
+            console.error("Error toggling wishlist", error);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
@@ -102,6 +142,15 @@ const Home = () => {
                                             Out of Stock
                                         </div>
                                     )}
+                                    {/* Wishlist Heart Button */}
+                                    <button 
+                                        className={`absolute top-2 right-12 p-2 rounded-full shadow-sm transition-all focus:outline-none ${wishlist.includes(product._id) ? 'bg-red-50 text-red-500 hover:bg-red-100' : 'bg-white text-gray-400 hover:text-red-500 hover:bg-gray-50'}`}
+                                        onClick={(e) => handleWishlistToggle(e, product._id)}
+                                    >
+                                        <svg className="w-4 h-4" fill={wishlist.includes(product._id) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                    </button>
                                 </div>
                                 <div className="p-4">
                                     <p className="text-gray-400 text-xs tracking-wider uppercase mb-1 font-semibold">{product.category}</p>

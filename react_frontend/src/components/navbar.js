@@ -96,7 +96,7 @@ const Navbar = () => {
 
                 {/* Navigation Links - Desktop */}
                 <ul className="hidden lg:flex items-center gap-8">
-                    {['Home', 'Shop', 'Smartphones', 'Laptops', 'Audio'].map((item) => (
+                    {['Home', 'Shop', 'Wishlist', 'Laptops', 'Audio'].map((item) => (
                         <li key={item}>
                             <Link
                                 to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
@@ -180,12 +180,6 @@ const Navbar = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <button className="p-1 text-gray-600 hover:text-gray-900 hover:-translate-y-0.5 transition-all duration-200" aria-label="Wishlist">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                            </svg>
-                        </button>
-
                         <Link to={localStorage.getItem('user') ? "/cart" : "/login"} className="relative p-1 text-gray-600 hover:text-gray-900 hover:-translate-y-0.5 transition-all duration-200" aria-label="Cart">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="9" cy="21" r="1"></circle>
@@ -227,7 +221,7 @@ const Navbar = () => {
                         </div>
 
                         <ul className="flex flex-col gap-4">
-                            {['Home', 'Shop', 'Smartphones', 'Laptops', 'Audio'].map((item) => (
+                            {['Home', 'Shop', 'Wishlist', 'Laptops', 'Audio'].map((item) => (
                                 <li key={item}>
                                     <Link
                                         to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}

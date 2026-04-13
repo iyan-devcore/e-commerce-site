@@ -13,6 +13,7 @@ const ProductDetail = lazy(() => import('./components/ProductDetail'));
 const Register = lazy(() => import('./components/register'));
 const Login = lazy(() => import('./components/login'));
 const Profile = lazy(() => import('./components/Profile'));
+const Wishlist = lazy(() => import('./components/Wishlist'));
 const Cart = lazy(() => import('./components/Cart'));
 const VerifyEmail = lazy(() => import('./components/VerifyEmail'));
 const Checkout = lazy(() => import('./components/checkout'));
@@ -64,6 +65,7 @@ function App() {
             
             {/* Protected User Routes */}
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
             <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
             <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
             

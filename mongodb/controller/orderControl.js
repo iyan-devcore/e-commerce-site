@@ -28,10 +28,20 @@ export const createOrder = async (req, res) => {
     }
 };
 
-// Get all orders
+// Get all orders (Admin?)
 export const getOrders = async (req, res) => {
     try {
         const orders = await Order.find();
+        res.status(200).json({ message: "Orders fetched successfully", data: orders });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching orders", error: error.message });
+    }
+};
+
+// Get current user's orders
+export const getMyOrders = async (req, res) => {
+    try {
+        const orders = await Order.find({ userId: req.user.id }).sort({ createdAt: -1 });
         res.status(200).json({ message: "Orders fetched successfully", data: orders });
     } catch (error) {
         res.status(500).json({ message: "Error fetching orders", error: error.message });
@@ -66,6 +76,27 @@ export const updateOrder = async (req, res) => {
         res.status(200).json({ message: "Order updated successfully", data: order });
     } catch (error) {
         res.status(500).json({ message: "Error updating order", error: error.message });
+    }
+};
+
+// Cancel an order (only if Processing)
+export const cancelOrder = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+        if (!order) return res.status(404).json({ message: "Order not found" });
+
+        if (order.userId.toString() !== req.user.id) {
+            return res.status(403).json({ message: "Not authorized to cancel this order" });
+        }
+        if (order.orderStatus !== "Processing") {
+            return res.status(400).json({ message: `Cannot cancel an order that is already ${order.orderStatus}` });
+        }
+
+        order.orderStatus = "Cancelled";
+        await order.save();
+        res.status(200).json({ message: "Order cancelled successfully", data: order });
+    } catch (error) {
+        res.status(500).json({ message: "Error cancelling order", error: error.message });
     }
 };
 
