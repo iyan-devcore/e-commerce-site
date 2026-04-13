@@ -58,6 +58,7 @@ const Checkout = () => {
         const orderData = {
             customerName: formData.fullName,
             email: user.email,
+            phone: formData.phone,
             total,
             paymentMethod: formData.paymentMethod,
             address: `${formData.addressLine1}, ${formData.city}, ${formData.state} - ${formData.zipCode}`,
@@ -70,6 +71,7 @@ const Checkout = () => {
                 size: item.size ? item.size.name : null
             }))
         };
+
 
         try {
             const token = user.token || "";

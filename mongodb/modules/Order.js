@@ -18,7 +18,9 @@ const orderSchema = new mongoose.Schema({
             size: { type: String }
         }
     ],
-    address: { type: String, required: true }
+    address: { type: String, required: true },
+    phone: { type: String }
+
 }, { timestamps: true });
 
 const Order = mongoose.model("Order", orderSchema);

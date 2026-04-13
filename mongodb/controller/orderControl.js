@@ -1,4 +1,5 @@
 import Order from "../modules/Order.js";
+import { sendOrderConfirmationSMS } from "../utils/smsService.js";
 
 // Create a new order
 export const createOrder = async (req, res) => {
@@ -12,6 +13,7 @@ export const createOrder = async (req, res) => {
             userId: req.user.id,
             customerName: req.body.customerName,
             email: req.body.email,
+            phone: req.body.phone || null,
             total: req.body.total,
             paymentMethod: req.body.paymentMethod,
             items: items, // Expecting array of objects
@@ -22,6 +24,17 @@ export const createOrder = async (req, res) => {
 
         const order = new Order(orderData);
         const savedOrder = await order.save();
+
+        // Send SMS confirmation (non-blocking — failure won't break the order)
+        if (req.body.phone) {
+            sendOrderConfirmationSMS(req.body.phone, {
+                customerName: req.body.customerName,
+                orderId: savedOrder._id,
+                total: req.body.total,
+                itemCount: Array.isArray(items) ? items.reduce((sum, i) => sum + (i.quantity || 1), 0) : 1
+            });
+        }
+
         res.status(201).json({ message: "Order created successfully", data: savedOrder });
     } catch (error) {
         res.status(500).json({ message: "Error creating order", error: error.message });

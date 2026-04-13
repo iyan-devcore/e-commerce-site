@@ -1,3 +1,4 @@
-import crypto from "crypto";
+import dotenv from "dotenv";
+dotenv.config();
 
-export const JWT_SECRET = crypto.randomBytes(64).toString("hex");
+export const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_change_me_in_production";
