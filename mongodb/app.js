@@ -10,6 +10,7 @@ import authRoutes from './router/authRoutes.js';
 import productRoutes from './router/productRoutes.js';
 import orderRoutes from './router/orderRoutes.js';
 import wishlistRoutes from './router/wishlistRoutes.js';
+import reviewRoutes from './router/reviewRoutes.js';
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use("/api/user", router);
 app.use("/api/product", productRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/review", reviewRoutes);
 
 app.use('/uploads', express.static('uploads'));
 

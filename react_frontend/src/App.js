@@ -24,10 +24,11 @@ const GetUsers = lazy(() => import('./components/getusers'));
 const AdminLayout = lazy(() => import('./admin/layout/AdminLayout'));
 const AdminDashboard = lazy(() => import('./admin/pages/Dashboard'));
 const AdminProducts = lazy(() => import('./admin/pages/Products'));
-const AdminOrders = lazy(() => import('./admin/pages/Orders'));
-const AdminLogin = lazy(() => import('./admin/pages/Login'));
+const AdminOrders    = lazy(() => import('./admin/pages/Orders'));
+const AdminLogin     = lazy(() => import('./admin/pages/Login'));
 const AdminCustomers = lazy(() => import('./admin/pages/Customers'));
-const AdminSettings = lazy(() => import('./admin/pages/Settings'));
+const AdminSettings  = lazy(() => import('./admin/pages/Settings'));
+const AdminReviews   = lazy(() => import('./admin/pages/Reviews'));
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -76,6 +77,7 @@ function App() {
               <Route path="products" element={<AdminProducts />} />
               <Route path="orders" element={<AdminOrders />} />
               <Route path="customers" element={<AdminCustomers />} />
+              <Route path="reviews" element={<AdminReviews />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
 
