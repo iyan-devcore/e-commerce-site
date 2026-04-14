@@ -19,8 +19,10 @@ export const createOrder = async (req, res) => {
             items: items, // Expecting array of objects
             address: req.body.address,
             paymentStatus: req.body.paymentStatus || "Pending",
-            orderStatus: req.body.orderStatus || "Processing"
+            orderStatus: req.body.orderStatus || "Processing",
+            stripePaymentId: req.body.stripePaymentId || null
         };
+
 
         const order = new Order(orderData);
         const savedOrder = await order.save();

@@ -13,6 +13,8 @@ import wishlistRoutes from './router/wishlistRoutes.js';
 import reviewRoutes from './router/reviewRoutes.js';
 import recommendationRoutes from './router/recommendationRoutes.js';
 import chatbotRoutes from './router/chatbotRoutes.js';
+import stripeRoutes from './router/stripeRoutes.js';
+
 
 const app = express();
 
@@ -33,6 +35,8 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/review", reviewRoutes);
 app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/chatbot", chatbotRoutes);
+app.use("/api/stripe", stripeRoutes);
+
 
 
 

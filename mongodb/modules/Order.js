@@ -19,7 +19,9 @@ const orderSchema = new mongoose.Schema({
         }
     ],
     address: { type: String, required: true },
-    phone: { type: String }
+    phone: { type: String },
+    stripePaymentId: { type: String }
+
 
 }, { timestamps: true });
 

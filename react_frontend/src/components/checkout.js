@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import StripeContainer from './StripeContainer';
+
 
 const Checkout = () => {
     const navigate = useNavigate();
@@ -16,6 +18,10 @@ const Checkout = () => {
         zipCode: '',
         paymentMethod: 'Credit Card'
     });
+
+    const [clientSecret, setClientSecret] = useState("");
+    const [showStripe, setShowStripe] = useState(false);
+
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -86,10 +92,11 @@ const Checkout = () => {
 
             if (response.ok) {
                 // Clear cart
-                localStorage.removeItem(`cart_${user.id}`);
+                const cartKey = `cart_${user.id}`;
+                localStorage.removeItem(cartKey);
                 window.dispatchEvent(new Event('cartUpdated'));
                 alert("Order placed successfully!");
-                navigate('/');
+                navigate('/profile'); // Redirect to orders/profile
             } else {
                 const errData = await response.json();
                 alert(`Error: ${errData.message}`);
@@ -101,6 +108,98 @@ const Checkout = () => {
             setLoading(false);
         }
     };
+
+    const handleStripePayment = async (e) => {
+        e.preventDefault();
+        
+        if (formData.paymentMethod === 'Cash on Delivery') {
+            handlePlaceOrder(e);
+            return;
+        }
+
+        setLoading(true);
+        const subtotal = calculateSubtotal();
+        const total = subtotal + 50;
+
+        try {
+            const token = user.token || "";
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/stripe/create-payment-intent`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ amount: total, currency: 'inr' })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setClientSecret(data.clientSecret);
+                setShowStripe(true);
+            } else {
+                const errData = await response.json();
+                alert(`Error: ${errData.message}`);
+            }
+        } catch (error) {
+            console.error('Stripe init error:', error);
+            alert("Failed to initialize payment.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const onPaymentSuccess = async (paymentId) => {
+        // Prepare order data with payment info
+        const subtotal = calculateSubtotal();
+        const total = subtotal + 50;
+        
+        const orderData = {
+            customerName: formData.fullName,
+            email: user.email,
+            phone: formData.phone,
+            total,
+            paymentMethod: 'Stripe',
+            paymentStatus: 'Paid',
+            stripePaymentId: paymentId,
+            address: `${formData.addressLine1}, ${formData.city}, ${formData.state} - ${formData.zipCode}`,
+            items: cartItems.map(item => ({
+                productId: item.product._id,
+                name: item.product.name || item.product.title,
+                price: item.product.discountPrice || item.product.price,
+                quantity: item.quantity,
+                color: item.color ? item.color.name : null,
+                size: item.size ? item.size.name : null
+            }))
+        };
+
+        setLoading(true);
+        try {
+            const token = user.token || "";
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/order/createOrder`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(orderData)
+            });
+
+            if (response.ok) {
+                localStorage.removeItem(`cart_${user.id}`);
+                window.dispatchEvent(new Event('cartUpdated'));
+                alert("Payment Successful! Order placed.");
+                navigate('/profile');
+            } else {
+                alert("Order creation failed after payment. Please contact support.");
+            }
+        } catch (error) {
+            console.error('Final order error:', error);
+            alert("An error occurred. Your payment might have been charged.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     if (!user || cartItems.length === 0) return null;
 
@@ -116,7 +215,8 @@ const Checkout = () => {
                     <div className="w-full lg:w-2/3">
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
                             <h2 className="text-xl font-bold text-gray-900 mb-6 border-b pb-4">Shipping Information</h2>
-                            <form onSubmit={handlePlaceOrder} className="space-y-6">
+                            <form onSubmit={handleStripePayment} className="space-y-6">
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
@@ -154,10 +254,20 @@ const Checkout = () => {
                                         <span className="ml-3 font-medium text-gray-900">Cash on Delivery</span>
                                     </label>
                                 </div>
-                                <button type="submit" disabled={loading} className="w-full mt-8 bg-blue-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20 disabled:opacity-50">
-                                    {loading ? 'Processing...' : `Pay ₹${finalTotal.toFixed(2)} & Place Order`}
+                                <button type="submit" disabled={loading || showStripe} className="w-full mt-8 bg-blue-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20 disabled:opacity-50">
+                                    {loading ? 'Processing...' : (formData.paymentMethod === 'Credit Card' ? `Proceed to Payment (₹${finalTotal.toFixed(2)})` : `Place Order (₹${finalTotal.toFixed(2)})`)}
                                 </button>
                             </form>
+
+                            {showStripe && (
+                                <StripeContainer 
+                                    clientSecret={clientSecret} 
+                                    orderData={formData} 
+                                    onSuccess={onPaymentSuccess} 
+                                    onCancel={() => setShowStripe(false)}
+                                />
+                            )}
+
                         </div>
                     </div>
                     {/* Right - Summary */}
