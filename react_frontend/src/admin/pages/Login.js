@@ -9,20 +9,20 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
-        email: '',
+        username: '',
         password: '',
         rememberMe: false
     });
+
     const [errors, setErrors] = useState({});
     const [loginError, setLoginError] = useState('');
 
     const validate = () => {
         const newErrors = {};
-        if (!formData.email) {
-            newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Email is invalid';
+        if (!formData.username) {
+            newErrors.username = 'Username is required';
         }
+
 
         if (!formData.password) {
             newErrors.password = 'Password is required';
@@ -44,17 +44,22 @@ const Login = () => {
 
         // Simulate API delay
         setTimeout(() => {
-            if (formData.email === 'admin@example.com' && formData.password === 'admin123') {
+            if (formData.username === 'admin' && formData.password === 'admin@123') {
                 // Success
-                localStorage.setItem('adminToken', 'fake-jwt-token-12345');
-                localStorage.setItem('adminUser', JSON.stringify({ name: 'Admin User', email: formData.email }));
+                localStorage.setItem('adminToken', 'admin-secret-session-token');
+                localStorage.setItem('adminUser', JSON.stringify({ name: 'System Admin', username: 'admin' }));
+                
+                // Clear any normal user session to prevent confusion
+                localStorage.removeItem('user');
+                
                 navigate('/admin');
             } else {
                 // Error
-                setLoginError('Invalid email or password');
+                setLoginError('Invalid username or password');
             }
             setIsLoading(false);
         }, 1500);
+
     };
 
     return (
@@ -86,18 +91,19 @@ const Login = () => {
 
             <form className="space-y-6" onSubmit={handleSubmit}>
                 <Input
-                    label="Email Address"
-                    type="email"
-                    placeholder="admin@example.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    error={errors.email}
+                    label="Username"
+                    type="text"
+                    placeholder="Enter admin username"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    error={errors.username}
                     icon={
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                     }
                 />
+
 
                 <Input
                     label="Password"

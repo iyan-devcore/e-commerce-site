@@ -42,7 +42,7 @@ const Orders = () => {
     const handleUpdateOrder = async () => {
         try {
             const token = JSON.parse(localStorage.getItem('user'))?.token || "";
-            await fetch(`${process.env.REACT_APP_API_URL}/order/updateOrder/${selectedOrder._id}`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/order/updateOrder/${selectedOrder._id}`, {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -50,28 +50,47 @@ const Orders = () => {
                 },
                 body: JSON.stringify(updateStatus)
             });
-            setIsModalOpen(false);
-            fetchOrders();
+
+            if (response.ok) {
+                setIsModalOpen(false);
+                fetchOrders();
+            } else {
+                const data = await response.json();
+                alert(data.message || "Failed to update order");
+            }
         } catch (err) {
             console.error('Error updating order:', err);
         }
     };
 
     const handleDeleteOrder = async (id) => {
-        if(window.confirm("Are you sure you want to delete this order?")) {
+        // Double check status before confirming
+        if (selectedOrder.orderStatus !== "Cancelled" && selectedOrder.orderStatus !== "Delivered") {
+            alert("Only Cancelled or Delivered orders can be deleted.");
+            return;
+        }
+
+        if(window.confirm("Are you sure you want to delete this order? This action cannot be undone.")) {
+
             try {
                 const token = JSON.parse(localStorage.getItem('user'))?.token || "";
-                await fetch(`${process.env.REACT_APP_API_URL}/order/deleteOrder/${id}`, {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/order/deleteOrder/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                setIsModalOpen(false);
-                fetchOrders();
+                if (response.ok) {
+                    setIsModalOpen(false);
+                    fetchOrders();
+                } else {
+                    const data = await response.json();
+                    alert(data.message || "Failed to delete order");
+                }
             } catch (err) {
                 console.error('Error deleting order:', err);
             }
         }
     };
+
 
     const filteredOrders = orders.filter(order => {
         const matchesStatus = filterStatus ? order.orderStatus === filterStatus : true;
@@ -153,11 +172,26 @@ const Orders = () => {
                 title="Order Details"
                 footer={
                     <>
-                        <Button onClick={handleUpdateOrder}>Update Order Status</Button>
+                        <Button 
+                            onClick={handleUpdateOrder} 
+                            disabled={selectedOrder?.orderStatus === 'Cancelled' || selectedOrder?.orderStatus === 'Delivered'}
+                        >
+                            Update Order Status
+                        </Button>
+
                         <Button variant="secondary" onClick={() => setIsModalOpen(false)}>Close</Button>
-                        <Button variant="ghost" className="text-red-600 hover:bg-red-50" onClick={() => handleDeleteOrder(selectedOrder._id)}>Delete Order</Button>
+                        {(selectedOrder?.orderStatus === 'Cancelled' || selectedOrder?.orderStatus === 'Delivered') && (
+                            <Button 
+                                variant="ghost" 
+                                className="text-red-600 hover:bg-red-50" 
+                                onClick={() => handleDeleteOrder(selectedOrder._id)}
+                            >
+                                Delete Order
+                            </Button>
+                        )}
                     </>
                 }
+
             >
                 {selectedOrder && (
                     <div className="space-y-6">
@@ -209,29 +243,40 @@ const Orders = () => {
                             </div>
                         </div>
 
-                        <div className="border-t border-gray-100 pt-4 grid grid-cols-2 gap-4">
-                            <Select
-                                label="Update Order Status"
-                                value={updateStatus.orderStatus}
-                                onChange={(e) => setUpdateStatus({...updateStatus, orderStatus: e.target.value})}
-                                options={[
-                                    { value: 'Processing', label: 'Processing' },
-                                    { value: 'Shipped', label: 'Shipped' },
-                                    { value: 'Delivered', label: 'Delivered' },
-                                    { value: 'Cancelled', label: 'Cancelled' },
-                                ]}
-                            />
-                            <Select
-                                label="Update Payment Status"
-                                value={updateStatus.paymentStatus}
-                                onChange={(e) => setUpdateStatus({...updateStatus, paymentStatus: e.target.value})}
-                                options={[
-                                    { value: 'Pending', label: 'Pending' },
-                                    { value: 'Paid', label: 'Paid' },
-                                    { value: 'Refunded', label: 'Refunded' },
-                                ]}
-                            />
-                        </div>
+                        {selectedOrder.orderStatus === 'Cancelled' || selectedOrder.orderStatus === 'Delivered' ? (
+                            <div className={`col-span-2 ${selectedOrder.orderStatus === 'Cancelled' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-green-50 text-green-700 border-green-100'} p-4 rounded-xl text-center font-medium border`}>
+                                {selectedOrder.orderStatus === 'Cancelled' 
+                                    ? "This order was cancelled. Status changes are locked."
+                                    : "This order has been delivered successfully. Status changes are locked."
+                                }
+                            </div>
+                        ) : (
+
+                            <div className="border-t border-gray-100 pt-4 grid grid-cols-2 gap-4">
+                                <Select
+                                    label="Update Order Status"
+                                    value={updateStatus.orderStatus}
+                                    onChange={(e) => setUpdateStatus({...updateStatus, orderStatus: e.target.value})}
+                                    options={[
+                                        { value: 'Processing', label: 'Processing' },
+                                        { value: 'Shipped', label: 'Shipped' },
+                                        { value: 'Delivered', label: 'Delivered' },
+                                        // 'Cancelled' removed as per business rule
+                                    ]}
+                                />
+                                <Select
+                                    label="Update Payment Status"
+                                    value={updateStatus.paymentStatus}
+                                    onChange={(e) => setUpdateStatus({...updateStatus, paymentStatus: e.target.value})}
+                                    options={[
+                                        { value: 'Pending', label: 'Pending' },
+                                        { value: 'Paid', label: 'Paid' },
+                                        { value: 'Refunded', label: 'Refunded' },
+                                    ]}
+                                />
+                            </div>
+                        )}
+
                     </div>
                 )}
             </Modal>

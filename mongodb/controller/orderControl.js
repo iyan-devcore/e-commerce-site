@@ -77,6 +77,20 @@ export const getOrderById = async (req, res) => {
 // Update order status or details
 export const updateOrder = async (req, res) => {
     try {
+        const order = await Order.findById(req.params.id);
+        if (!order) return res.status(404).json({ message: "Order not found" });
+
+        // Rule: If order is already cancelled or delivered, status cannot be changed
+        if (order.orderStatus === "Cancelled" || order.orderStatus === "Delivered") {
+            return res.status(400).json({ message: `Cannot update an order that is already ${order.orderStatus}` });
+        }
+
+
+        // Rule: Admin cannot set status to Cancelled (Only users can)
+        if (req.body.orderStatus === "Cancelled") {
+            return res.status(400).json({ message: "Administrators cannot cancel orders. Only users can cancel their own orders." });
+        }
+
         const updateData = {
             orderStatus: req.body.orderStatus,
             paymentStatus: req.body.paymentStatus,
@@ -85,14 +99,13 @@ export const updateOrder = async (req, res) => {
         // Remove undefined fields
         Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
-        const order = await Order.findByIdAndUpdate(req.params.id, updateData, { new: true });
-        if (!order) return res.status(404).json({ message: "Order not found" });
-
-        res.status(200).json({ message: "Order updated successfully", data: order });
+        const updatedOrder = await Order.findByIdAndUpdate(req.params.id, updateData, { new: true });
+        res.status(200).json({ message: "Order updated successfully", data: updatedOrder });
     } catch (error) {
         res.status(500).json({ message: "Error updating order", error: error.message });
     }
 };
+
 
 // Cancel an order (only if Processing)
 export const cancelOrder = async (req, res) => {
@@ -118,10 +131,20 @@ export const cancelOrder = async (req, res) => {
 // Delete an order
 export const deleteOrder = async (req, res) => {
     try {
-        const order = await Order.findByIdAndDelete(req.params.id);
+        const order = await Order.findById(req.params.id);
         if (!order) return res.status(404).json({ message: "Order not found" });
+
+        // Rule: Admin can only delete orders that are cancelled or delivered
+        if (order.orderStatus !== "Cancelled" && order.orderStatus !== "Delivered") {
+            return res.status(400).json({ 
+                message: `Cannot delete an active order. Order must be 'Cancelled' or 'Delivered' first. Current status: ${order.orderStatus}` 
+            });
+        }
+
+        await Order.findByIdAndDelete(req.params.id);
         res.status(200).json({ message: "Order deleted successfully", data: order });
     } catch (error) {
         res.status(500).json({ message: "Error deleting order", error: error.message });
     }
 };
+
