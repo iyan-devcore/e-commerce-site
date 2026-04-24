@@ -35,7 +35,9 @@ const Cart = () => {
 
     const updateQuantity = (index, delta) => {
         const newCart = [...cartItems];
-        newCart[index].quantity = Math.max(1, newCart[index].quantity + delta);
+        const item = newCart[index];
+        const maxStock = item.product?.stockParams?.quantity ?? item.product?.stock ?? Infinity;
+        item.quantity = Math.min(maxStock, Math.max(1, item.quantity + delta));
         setCartItems(newCart);
         localStorage.setItem(`cart_${user.id}`, JSON.stringify(newCart));
         window.dispatchEvent(new Event('cartUpdated'));
@@ -121,8 +123,9 @@ const Cart = () => {
                                                             </span>
                                                             <button 
                                                                 onClick={() => updateQuantity(index, 1)}
-                                                                className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded-r-lg transition-colors"
+                                                                className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded-r-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                                 title="Increase quantity"
+                                                                disabled={item.quantity >= (item.product?.stockParams?.quantity ?? item.product?.stock ?? Infinity)}
                                                             >
                                                                 +
                                                             </button>

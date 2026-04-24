@@ -1,100 +1,152 @@
-# 🛒 E-commerce Platform with ML (MERN Stack)
+# E-commerce with ML (MERN Stack)
 
-A modern, full-stack e-commerce application built using the MERN stack (MongoDB, Express, React, Node.js). This platform provides a complete shopping experience for customers and a robust administrative dashboard for store managers. It serves as a foundation for integrating Machine Learning features (like product recommendations and sales forecasting) in the future.
+A comprehensive, full-stack E-commerce platform built using the MERN stack (MongoDB, Express, React, Node.js) with integrated Machine Learning capabilities for personalized product recommendations and sentiment-based review analysis.
 
-## 🚀 Project Overview
+## 🚀 Features
 
-The project is divided into two primary domains, featuring a complete API backend and a responsive React frontend:
+### 🛍️ Customer Storefront
+- **Dynamic Product Browsing**: Seamlessly browse products with paginated results, category filtering, and search functionality.
+- **Product Details**: High-quality product views with multiple images, detailed descriptions, and live stock status.
+- **AI Recommendations**: Personalized "Products you may also like" section powered by an item-based collaborative filtering algorithm.
+- **Smart Shopping Cart**: Efficient cart management with real-time price updates.
+- **Wishlist**: Save favorite products for later with a dedicated wishlist view.
+- **Secure Checkout**: Integrated **Stripe** payment gateway for secure credit card transactions.
+- **Order Tracking**: Detailed order history and live status updates (Order Placed, Shipped, Delivered).
 
-### 🛍️ Public-Facing Storefront (Customer Journey)
-*   **Browsing & Navigation:** Users can browse through diverse categories (Smartphones, Fashion, Home & Living, Beauty, Accessories, Toys, Laptops, Audio).
-*   **Product Interaction:** Detailed product pages showing extensive information, pricing, and dynamic imagery.
-*   **Authentication Flow:** Secure user registration and login functionality allowing customers to manage their profiles.
-*   **Modern UI:** Responsive design built with React and Tailwind CSS.
+### 🤖 Intelligent Features
+- **Recommendation Engine**: Custom-built Item-based Collaborative Filtering using Cosine Similarity to suggest products based on user purchase patterns.
+- **Sentiment Analysis**: Automatic sentiment classification for user reviews (Positive, Neutral, Negative) to help customers and admins gauge feedback.
+- **Chatbot Support**: AI-driven chatbot to assist users with common queries and navigation.
+- **SMS Notifications**: Real-time order confirmations and status updates sent via **Twilio**.
 
-### 🛡️ Secure Admin Dashboard (Management Journey)
-*   **Centralized Hub:** A dedicated dashboard providing a high-level overview of revenue, orders, and customer metrics.
-*   **Product Management (CRUD):** Full capability to add, view, update, and delete products, including image uploads via Multer.
-*   **Order Tracking:** Monitor and update customer orders (Pending, Processing, Shipped, Delivered).
-*   **Customer Roster:** View and manage registered users on the platform.
+### 🛠️ Admin Dashboard
+- **Comprehensive Analytics**: Overview of sales, total users, and product performance.
+- **Inventory Management**: Full CRUD operations for products, including image uploads and stock management.
+- **Order Processing**: Manage customer orders, update shipping statuses, and view transaction details.
+- **User Moderation**: Manage user accounts and review content.
 
-### ⚙️ Robust Backend System (Node.js & MongoDB)
-*   **RESTful APIs:** Fully functional endpoints connecting the React frontend to the MongoDB database for Users, Products, and Orders.
-*   **Mongoose Modeling:** Structured data schemas (`Order.js`, `Product.js`, `Users.js`).
-*   **Media Handling:** Integrated image upload handling.
+### 🔐 Security & Reliability
+- **JWT Authentication**: Secure login and registration with JSON Web Tokens.
+- **Email Verification**: Link-based email verification using **Nodemailer** to ensure valid user accounts.
+- **Role-Based Access Control (RBAC)**: Strict separation between customer and administrative functionalities.
+- **Containerized Environment**: Fully Dockerized setup for easy deployment and scalability.
+
+---
 
 ## 🛠️ Tech Stack
 
-### Frontend (`/react_frontend`)
-*   **Build & UI:** React (v19), React Router DOM, React Icons
-*   **Styling:** Tailwind CSS
-*   **Icons:** Lucide React
+- **Frontend**: React.js, TailwindCSS, Axios, Framer Motion (Animations).
+- **Backend**: Node.js, Express.js.
+- **Database**: MongoDB (Mongoose ODM).
+- **Payments**: Stripe API.
+- **Notifications**: Twilio (SMS), Nodemailer (Email).
+- **Machine Learning**: Item-based Collaborative Filtering (Custom JS), Sentiment Analysis logic.
+- **DevOps**: Docker, Docker Compose.
 
-### Backend (`/mongodb`)
-*   **Server:** Node.js, Express.js
-*   **Database:** MongoDB & Mongoose
-*   **Middleware:** Cors, Multer (for file uploads)
-*   **Security:** Bcrypt (for password hashing)
+---
 
-## 📂 Project Structure
+## 📁 Project Structure
 
-```text
-/ecommerce with ML
-├── /mongodb                 # Backend Express application
-│   ├── /controller          # Logic for Handling requests (Users, Products, Orders)
-│   ├── /modules             # Mongoose schemas/models
-│   ├── /router              # API Route definitions
-│   └── app.js               # Main server entry file
-│
-└── /react_frontend          # Frontend React application
-    ├── /public              # Static assets
-    ├── /src
-    │   ├── /admin           # Complete Admin Dashboard (Pages, Layouts, UI)
-    │   ├── /components      # Customer-facing storefront components
-    │   └── App.js           # Frontend routes and app shell
+```bash
+ecommerce-with-ml/
+├── mongodb/                # Backend (Node.js API)
+│   ├── controller/         # Business logic (Auth, Products, ML, Orders)
+│   ├── modules/            # Mongoose Schema Definitions
+│   ├── router/             # API Endpoint Routing
+│   ├── utils/              # Helper functions (SMS, Email, Sentiment)
+│   └── uploads/            # Product image storage
+├── react_frontend/         # Frontend (React App)
+│   ├── src/
+│   │   ├── admin/          # Admin Dashboard Components & Pages
+│   │   ├── components/     # Reusable UI Components
+│   │   └── pages/          # Customer-facing Pages (Shop, Cart, Profile)
+├── docker-compose.yml      # Orchestration for MongoDB, Backend, and Frontend
+└── README.md               # You are here
 ```
 
-## ⚙️ Installation & Setup
+---
+
+## 🚦 Getting Started
 
 ### Prerequisites
-*   Node.js installed on your machine.
-*   MongoDB installed locally or a MongoDB Atlas connection string.
 
-### 1. Backend Setup
-Navigate to the backend directory and install dependencies:
+- [Node.js](https://nodejs.org/) (v16+)
+- [Docker](https://www.docker.com/) (Optional, for containerized run)
+- [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) or a local MongoDB instance
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/ecommerce-with-ml.git
+   cd ecommerce-with-ml
+   ```
+
+2. **Backend Setup:**
+   ```bash
+   cd mongodb
+   # Create a .env file and fill in your credentials (see .env section)
+   npm install
+   npm start
+   ```
+
+3. **Frontend Setup:**
+   ```bash
+   cd ../react_frontend
+   # Create a .env file and point to back-end URL
+   npm install
+   npm start
+   ```
+
+### 🐳 Running with Docker
+
+You can spin up the entire stack (Database, Backend, Frontend) with a single command:
 
 ```bash
-cd mongodb
-npm install
+docker-compose up --build
 ```
 
-Start the backend server (typically runs on `http://localhost:5000`):
+---
 
-```bash
-node app.js
+## 🔑 Environment Variables
+
+### Backend (`/mongodb/.env`)
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+STRIPE_SECRET_KEY=your_stripe_key
+TWILIO_ACCOUNT_SID=your_twilio_sid
+TWILIO_AUTH_TOKEN=your_twilio_token
+TWILIO_PHONE_NUMBER=your_twilio_number
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_app_password
 ```
 
-### 2. Frontend Setup
-Navigate to the frontend directory and install dependencies:
-
-```bash
-cd react_frontend
-npm install
+### Frontend (`/react_frontend/.env`)
+```env
+REACT_APP_API_URL=http://localhost:5000/api
+REACT_APP_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
 ```
 
-Start the React development server:
+---
 
-```bash
-npm start
-# The application will launch on http://localhost:3000
-```
+## 📈 ML Recommendation System Logic
 
-## 🗺️ Future Roadmap
+The recommendation engine uses **Item-based Collaborative Filtering**:
+1. **User-Item Matrix**: Processes order history to determine product weights for each user.
+2. **Cosine Similarity**: Calculates the similarity score between products based on co-purchase patterns.
+3. **Hybrid Fallback**: If a product has no purchase history (Cold Start), the system falls back to **Content-Filtered** logic (Category Match + Popularity).
 
-*   [ ] **Machine Learning Integration:** Add recommendation engines and predictive analytics.
-*   [ ] **Payment Gateway:** Integrate secure checkouts with Stripe or Razorpay.
-*   [ ] **Advanced Analytics:** Detailed charts in the admin dashboard.
-*   [ ] **JWT Authentication:** Upgrade token management for scalable security.
+---
 
-## 🤝 Contributing
-Contributions, issues, and feature requests are always welcome!
+## 👤 Author
+
+**Iyan**  
+Graduate Student | Full Stack Developer | ML Enthusiast
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

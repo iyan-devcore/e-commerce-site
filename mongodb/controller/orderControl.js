@@ -1,4 +1,5 @@
 import Order from "../modules/Order.js";
+import Product from "../modules/Product.js";
 import { sendOrderConfirmationSMS } from "../utils/smsService.js";
 
 // Create a new order
@@ -7,6 +8,17 @@ export const createOrder = async (req, res) => {
         let items = req.body.items;
         if (typeof items === 'string') {
             try { items = JSON.parse(items); } catch(e) {}
+        }
+
+        // --- Stock Validation ---
+        for (const item of items) {
+            const product = await Product.findById(item.productId);
+            if (!product) {
+                return res.status(404).json({ message: `Product not found: ${item.name}` });
+            }
+            if (product.stock < item.quantity) {
+                return res.status(400).json({ message: `Insufficient stock for ${item.name}. Available: ${product.stock}, Requested: ${item.quantity}` });
+            }
         }
 
         const orderData = {
@@ -26,6 +38,13 @@ export const createOrder = async (req, res) => {
 
         const order = new Order(orderData);
         const savedOrder = await order.save();
+
+        // --- Decrement Stock ---
+        for (const item of items) {
+            await Product.findByIdAndUpdate(item.productId, {
+                $inc: { stock: -item.quantity }
+            });
+        }
 
         // Send SMS confirmation (non-blocking — failure won't break the order)
         if (req.body.phone) {
@@ -122,6 +141,13 @@ export const cancelOrder = async (req, res) => {
 
         order.orderStatus = "Cancelled";
         await order.save();
+
+        // --- Replenish Stock ---
+        for (const item of order.items) {
+            await Product.findByIdAndUpdate(item.productId, {
+                $inc: { stock: item.quantity }
+            });
+        }
         res.status(200).json({ message: "Order cancelled successfully", data: order });
     } catch (error) {
         res.status(500).json({ message: "Error cancelling order", error: error.message });

@@ -377,6 +377,17 @@ const ProductDetail = () => {
                             <span className="text-xl text-gray-400 line-through mb-1">₹{product.price}</span>
                         </div>
 
+                        {/* Stock Indicator */}
+                        <div className="mt-1">
+                            {product.stockParams.quantity > 5 ? (
+                                <span className="text-sm font-medium text-green-600 px-2.5 py-1 bg-green-50 rounded-md border border-green-100">✔ In Stock ({product.stockParams.quantity} available)</span>
+                            ) : product.stockParams.quantity > 0 ? (
+                                <span className="text-sm font-medium text-orange-600 px-2.5 py-1 bg-orange-50 rounded-md border border-orange-100">⏳ Hurry! Only {product.stockParams.quantity} left in stock</span>
+                            ) : (
+                                <span className="text-sm font-medium text-red-600 px-2.5 py-1 bg-red-50 rounded-md border border-red-100">❌ Out of Stock</span>
+                            )}
+                        </div>
+
                         {/* Description */}
                         <p className="text-gray-600 leading-relaxed">
                             {product.shortDescription}
@@ -438,8 +449,9 @@ const ProductDetail = () => {
                                 </button>
                                 <span className="w-12 text-center font-medium text-gray-900">{quantity}</span>
                                 <button
-                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-r-lg"
-                                    onClick={() => setQuantity(quantity + 1)}
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-r-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                    onClick={() => setQuantity(Math.min(product.stockParams.quantity, quantity + 1))}
+                                    disabled={quantity >= product.stockParams.quantity}
                                 >
                                     +
                                 </button>
@@ -448,10 +460,11 @@ const ProductDetail = () => {
                             {/* Add to Cart */}
                             <button 
                                 onClick={handleAddToCart}
-                                className="flex-1 bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20"
+                                disabled={product.stockParams.quantity === 0}
+                                className={`flex-1 font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg ${product.stockParams.quantity === 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/20'}`}
                             >
                                 <ShoppingCartIcon />
-                                Add to Cart
+                                {product.stockParams.quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
                             </button>
 
                             {/* Wishlist Button */}
